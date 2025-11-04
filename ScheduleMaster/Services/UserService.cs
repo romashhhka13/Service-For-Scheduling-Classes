@@ -14,7 +14,7 @@ namespace ScheduleMaster.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
+        public async Task<List<UserDTO>> GetAllUsersAsync()
         {
             return await _context.Users.Select(
                 user => new UserDTO
@@ -53,8 +53,8 @@ namespace ScheduleMaster.Services
         public async Task<UserDTO> CreateUserAsync(CreateUserDTO createDTO)
         {
             // Проверка email
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == createDTO.Email);
-            if (existingUser != null)
+            var userExist = await _context.Users.AnyAsync(user => user.Email == createDTO.Email);
+            if (!userExist)
                 throw new Exception($"Пользователь с email '{createDTO.Email}' уже существует");
 
             // var hashedPassword = HashPassword(createDto.Password);

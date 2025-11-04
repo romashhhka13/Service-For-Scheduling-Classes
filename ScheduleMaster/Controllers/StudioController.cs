@@ -38,12 +38,19 @@ namespace ScheduleMaster.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateStudioDTO createDTO)
         {
-            var studio = await _studioService.CreateStudioAsync(createDTO);
-            return CreatedAtAction(nameof(GetStudioById), new { id = studio.Id }, studio); // 201
+            try
+            {
+                var studio = await _studioService.CreateStudioAsync(createDTO);
+                return CreatedAtAction(nameof(GetStudioById), new { id = studio.Id }, studio); // 201
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // PUT: api/studio/{id}
-        [HttpPut("{id}")]
+        // Patch: api/studio/{id}
+        [HttpPatch("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStudioDTO updateDTO)
         {
             var studio = await _studioService.UpdateStudioAsync(id, updateDTO);

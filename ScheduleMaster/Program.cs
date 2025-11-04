@@ -9,6 +9,8 @@ builder.Services.AddDbContext<ScheduleMasterDbContext>(options =>
 
 builder.Services.AddScoped<StudioService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<GroupService>();
+builder.Services.AddScoped<ScheduleService>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

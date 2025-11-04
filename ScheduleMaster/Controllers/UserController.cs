@@ -49,8 +49,8 @@ namespace ScheduleMaster.Controllers
             }
         }
 
-        // PUT: api/user/{id}
-        [HttpPut("{id}")]
+        // Patch: api/user/{id}
+        [HttpPatch("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserDTO updateDTO)
         {
             var studio = await _userService.UpdateUserAsync(id, updateDTO);

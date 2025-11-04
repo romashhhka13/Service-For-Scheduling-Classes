@@ -17,12 +17,12 @@ namespace ScheduleMaster.Services
         public async Task<IEnumerable<StudioDTO>> GetAllStudiosAsync()
         {
             return await _context.Studios.Select(
-                s => new StudioDTO
+                studio => new StudioDTO
                 {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Category = s.Category,
-                    AdministratorId = s.AdministratorId
+                    Id = studio.Id,
+                    Name = studio.Name,
+                    Category = studio.Category,
+                    AdministratorId = studio.AdministratorId
                 })
                 .ToListAsync();
         }
@@ -43,6 +43,10 @@ namespace ScheduleMaster.Services
 
         public async Task<StudioDTO> CreateStudioAsync(CreateStudioDTO createDTO)
         {
+            var adminExists = await _context.Users.AnyAsync(user => user.Id == createDTO.AdministratorId);
+            if (!adminExists)
+                throw new Exception($"Руководитель с ID '{createDTO.AdministratorId}' не найден");
+
             var studio = new Studio
             {
                 Id = Guid.NewGuid(),
