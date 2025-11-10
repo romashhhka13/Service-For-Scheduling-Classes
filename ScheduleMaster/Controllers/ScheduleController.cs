@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ScheduleMaster.DTOs;
 using ScheduleMaster.Services;
@@ -17,6 +18,7 @@ namespace ScheduleMaster.Controllers
 
         // GET: api/schedule
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAll()
         {
             var schedules = await _scheduleService.GetAllSchedulesAsync();
@@ -25,6 +27,7 @@ namespace ScheduleMaster.Controllers
 
         // GET: api/schedule/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> GetScheduleById(Guid id)
         {
             var schedule = await _scheduleService.GetScheduleByIdAsync(id);
@@ -35,6 +38,7 @@ namespace ScheduleMaster.Controllers
 
         // POST: api/schedule
         [HttpPost]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Create([FromBody] CreateScheduleDTO createDTO)
         {
             try
@@ -50,6 +54,7 @@ namespace ScheduleMaster.Controllers
 
         // Patch: api/schedule/{id}
         [HttpPatch("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateScheduleDTO updateDTO)
         {
             try
@@ -67,6 +72,7 @@ namespace ScheduleMaster.Controllers
 
         // DELETE: api/schedule/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _scheduleService.DeleteScheduleAsync(id);

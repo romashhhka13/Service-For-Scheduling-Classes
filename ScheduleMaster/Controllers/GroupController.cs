@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ScheduleMaster.DTOs;
 using ScheduleMaster.Services;
@@ -17,6 +18,7 @@ namespace ScheduleMaster.Controllers
 
         // GET: api/group
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAll()
         {
             var groups = await _groupService.GetAllGroupsAsync();
@@ -25,6 +27,7 @@ namespace ScheduleMaster.Controllers
 
         // GET: api/group/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> GetGroupById(Guid id)
         {
             var group = await _groupService.GetGroupByIdAsync(id);
@@ -35,6 +38,7 @@ namespace ScheduleMaster.Controllers
 
         // POST: api/group
         [HttpPost]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Create([FromBody] CreateGroupDTO createDTO)
         {
             try
@@ -50,6 +54,7 @@ namespace ScheduleMaster.Controllers
 
         // PATCH: api/group/{id}
         [HttpPatch("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGroupDTO updateDTO)
         {
             var group = await _groupService.UpdateGroupAsync(id, updateDTO);
@@ -60,6 +65,7 @@ namespace ScheduleMaster.Controllers
 
         // DELETE: api/group/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _groupService.DeleteGroupAsync(id);

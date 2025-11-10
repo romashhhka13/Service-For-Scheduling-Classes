@@ -47,7 +47,8 @@ namespace ScheduleMaster.Data
             modelBuilder.Entity<Group>()
                 .HasOne<Studio>()
                 .WithMany()
-                .HasForeignKey(group => group.StudioId);
+                .HasForeignKey(group => group.StudioId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // studio_memberships
             modelBuilder.Entity<StudioMembership>().ToTable("studio_memberships")
@@ -56,12 +57,14 @@ namespace ScheduleMaster.Data
             modelBuilder.Entity<StudioMembership>()
                 .HasOne<User>()
                 .WithMany()
-                .HasForeignKey(studio_membership => studio_membership.StudentId);
+                .HasForeignKey(studio_membership => studio_membership.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<StudioMembership>()
                 .HasOne<Studio>()
                 .WithMany()
-                .HasForeignKey(studio_membership => studio_membership.StudioId);
+                .HasForeignKey(studio_membership => studio_membership.StudioId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // group_memberships
             modelBuilder.Entity<GroupMembership>().ToTable("group_memberships")
@@ -74,12 +77,14 @@ namespace ScheduleMaster.Data
             modelBuilder.Entity<GroupMembership>()
                 .HasOne<User>()
                 .WithMany()
-                .HasForeignKey(group_membership => group_membership.StudentId);
+                .HasForeignKey(group_membership => group_membership.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<GroupMembership>()
                 .HasOne<Group>()
                 .WithMany()
-                .HasForeignKey(group_membership => group_membership.GroupId);
+                .HasForeignKey(group_membership => group_membership.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // schedules
             modelBuilder.Entity<Schedule>().ToTable("schedules")
@@ -88,7 +93,14 @@ namespace ScheduleMaster.Data
             modelBuilder.Entity<Schedule>()
                 .HasOne<Group>()
                 .WithMany()
-                .HasForeignKey(schedule => schedule.GroupId);
+                .HasForeignKey(schedule => schedule.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Schedule>()
+                .HasOne<Studio>()
+                .WithMany()
+                .HasForeignKey(schedule => schedule.StudioId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }

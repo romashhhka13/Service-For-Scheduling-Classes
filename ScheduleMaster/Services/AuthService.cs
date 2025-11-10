@@ -39,7 +39,7 @@ namespace ScheduleMaster.Services
                 MiddleName = registerDTO.MiddleName,
                 Email = registerDTO.Email,
                 PasswordHash = hashedPassword,
-                Role = "student",
+                Role = registerDTO.Role,
                 Faculty = registerDTO.Faculty,
                 GroupName = registerDTO.GroupName,
                 Course = registerDTO.Course

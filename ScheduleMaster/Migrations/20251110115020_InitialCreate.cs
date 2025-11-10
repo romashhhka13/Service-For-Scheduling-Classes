@@ -138,7 +138,14 @@ namespace ScheduleMaster.Migrations
                         name: "FK_schedules_groups_GroupId",
                         column: x => x.GroupId,
                         principalTable: "groups",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_schedules_studios_StudioId",
+                        column: x => x.StudioId,
+                        principalTable: "studios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -161,6 +168,11 @@ namespace ScheduleMaster.Migrations
                 name: "IX_schedules_GroupId",
                 table: "schedules",
                 column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_schedules_StudioId",
+                table: "schedules",
+                column: "StudioId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_studio_memberships_StudioId",

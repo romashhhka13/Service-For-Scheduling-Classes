@@ -18,7 +18,7 @@ namespace ScheduleMaster.Controllers
 
         // GET: api/user
         [HttpGet]
-        [Authorize(Roles = "student")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllUsersAsync();
@@ -27,6 +27,7 @@ namespace ScheduleMaster.Controllers
 
         // GET: api/user/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -38,6 +39,7 @@ namespace ScheduleMaster.Controllers
 
         // POST: api/user
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDTO createDTO)
         {
             try
@@ -53,6 +55,7 @@ namespace ScheduleMaster.Controllers
 
         // Patch: api/user/{id}
         [HttpPatch("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserDTO updateDTO)
         {
             var studio = await _userService.UpdateUserAsync(id, updateDTO);
@@ -72,6 +75,7 @@ namespace ScheduleMaster.Controllers
 
         // DELETE: api/studio/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _userService.DeleteUserAsync(id);

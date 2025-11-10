@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ScheduleMaster.DTOs;
 using ScheduleMaster.Services;
@@ -17,6 +18,7 @@ namespace ScheduleMaster.Controllers
 
         // GET: api/studio
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAll()
         {
             var studios = await _studioService.GetAllStudiosAsync();
@@ -25,6 +27,7 @@ namespace ScheduleMaster.Controllers
 
         // GET: api/studio/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> GetStudioById(Guid id)
         {
             var studio = await _studioService.GetStudioByIdAsync(id);
@@ -36,6 +39,7 @@ namespace ScheduleMaster.Controllers
 
         // POST: api/studio
         [HttpPost]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Create([FromBody] CreateStudioDTO createDTO)
         {
             try
@@ -51,6 +55,7 @@ namespace ScheduleMaster.Controllers
 
         // Patch: api/studio/{id}
         [HttpPatch("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStudioDTO updateDTO)
         {
             var studio = await _studioService.UpdateStudioAsync(id, updateDTO);
@@ -62,6 +67,7 @@ namespace ScheduleMaster.Controllers
 
         // DELETE: api/studio/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _studioService.DeleteStudioAsync(id);

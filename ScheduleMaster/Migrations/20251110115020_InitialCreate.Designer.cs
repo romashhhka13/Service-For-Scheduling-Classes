@@ -12,7 +12,7 @@ using ScheduleMaster.Data;
 namespace ScheduleMaster.Migrations
 {
     [DbContext(typeof(ScheduleMasterDbContext))]
-    [Migration("20251110110913_InitialCreate")]
+    [Migration("20251110115020_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -93,6 +93,8 @@ namespace ScheduleMaster.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GroupId");
+
+                    b.HasIndex("StudioId");
 
                     b.ToTable("schedules", (string)null);
                 });
@@ -210,7 +212,14 @@ namespace ScheduleMaster.Migrations
                 {
                     b.HasOne("ScheduleMaster.Models.Group", null)
                         .WithMany()
-                        .HasForeignKey("GroupId");
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("ScheduleMaster.Models.Studio", null)
+                        .WithMany()
+                        .HasForeignKey("StudioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ScheduleMaster.Models.Studio", b =>
