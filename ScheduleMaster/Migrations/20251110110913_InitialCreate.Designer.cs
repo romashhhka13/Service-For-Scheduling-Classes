@@ -12,8 +12,8 @@ using ScheduleMaster.Data;
 namespace ScheduleMaster.Migrations
 {
     [DbContext(typeof(ScheduleMasterDbContext))]
-    [Migration("20251103154557_UpdateScheduleSchema")]
-    partial class UpdateScheduleSchema
+    [Migration("20251110110913_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

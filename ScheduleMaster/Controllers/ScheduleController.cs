@@ -83,23 +83,12 @@ namespace ScheduleMaster.Controllers
             return Ok(schedules);
         }
 
-        // GET: api/schedule/recurring
-        // [HttpGet("recurring")]
-        // public async Task<IActionResult> GetRecurring()
-        // {
-        //     var schedules = await _scheduleService.GetRecurringSchedulesAsync();
-        //     return Ok(schedules);
-        // }
+        [HttpGet("details")]
+        public async Task<IActionResult> GetScheduleDetails()
+        {
+            var details = await _scheduleService.GetScheduleDetailsAsync();
+            return Ok(details);
+        }
 
-        // GET: api/schedule/by-location?location=Зал1
-        // [HttpGet("by-location")]
-        // public async Task<IActionResult> GetByLocation([FromQuery] string location)
-        // {
-        //     if (string.IsNullOrEmpty(location))
-        //         return BadRequest(new { message = "Location parameter is required" });
-
-        //     var schedules = await _scheduleService.GetSchedulesByLocationAsync(location);
-        //     return Ok(schedules);
-        // }
     }
 }

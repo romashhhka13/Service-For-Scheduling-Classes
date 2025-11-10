@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ScheduleMaster.DTOs;
 using ScheduleMaster.Services;
@@ -17,6 +18,7 @@ namespace ScheduleMaster.Controllers
 
         // GET: api/user
         [HttpGet]
+        [Authorize(Roles = "student")]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllUsersAsync();

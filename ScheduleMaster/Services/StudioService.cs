@@ -14,7 +14,7 @@ namespace ScheduleMaster.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<StudioDTO>> GetAllStudiosAsync()
+        public async Task<List<StudioDTO>> GetAllStudiosAsync()
         {
             return await _context.Studios.Select(
                 studio => new StudioDTO

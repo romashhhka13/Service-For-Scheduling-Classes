@@ -32,7 +32,7 @@ namespace ScheduleMaster.DTOs
         public string? Name { get; set; }
         public string? MiddleName { get; set; }
         public string? Email { get; set; }
-        public string? Role { get; set; }
+        public string? Role { get; set; } // ?
         public string? Faculty { get; set; }
         public string? GroupName { get; set; }
         public short? Course { get; set; }

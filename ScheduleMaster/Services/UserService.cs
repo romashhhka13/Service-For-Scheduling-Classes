@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScheduleMaster.Data;
 using ScheduleMaster.DTOs;
 using ScheduleMaster.Models;
+using ScheduleMaster.Helpers;
 
 namespace ScheduleMaster.Services
 {
@@ -54,10 +56,10 @@ namespace ScheduleMaster.Services
         {
             // Проверка email
             var userExist = await _context.Users.AnyAsync(user => user.Email == createDTO.Email);
-            if (!userExist)
+            if (userExist)
                 throw new Exception($"Пользователь с email '{createDTO.Email}' уже существует");
 
-            // var hashedPassword = HashPassword(createDto.Password);
+            var hashedPassword = PasswordHasher.Generate(createDTO.Password);
 
             var user = new User
             {
@@ -66,7 +68,7 @@ namespace ScheduleMaster.Services
                 Name = createDTO.Name,
                 MiddleName = createDTO.MiddleName,
                 Email = createDTO.Email,
-                PasswordHash = createDTO.Password,
+                PasswordHash = hashedPassword,
                 Role = createDTO.Role,
                 Faculty = createDTO.Faculty,
                 GroupName = createDTO.GroupName,

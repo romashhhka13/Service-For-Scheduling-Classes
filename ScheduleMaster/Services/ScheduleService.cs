@@ -145,7 +145,7 @@ namespace ScheduleMaster.Services
         }
 
         // LINQ запрос: получить расписания для конкретной группы
-        public async Task<List<ScheduleDTO>?> GetSchedulesByGroupIdAsync(Guid groupId)
+        public async Task<List<ScheduleDTO>> GetSchedulesByGroupIdAsync(Guid groupId)
         {
             // var groupExists = await _context.Groups.AnyAsync(group => group.Id == groupId);
             // if (!groupExists)
@@ -165,6 +165,26 @@ namespace ScheduleMaster.Services
                     IsRecurring = schedule.IsRecurring
                 })
                 .ToListAsync();
+        }
+
+        public async Task<List<ScheduleDetailDTO>> GetScheduleDetailsAsync()
+        {
+            return await (from schedule in _context.Schedules
+                          join studio in _context.Studios
+                              on schedule.StudioId equals studio.Id
+                          join g in _context.Groups
+                              on schedule.GroupId equals g.Id into groupJoin
+                          from g in groupJoin.DefaultIfEmpty()
+                          select new ScheduleDetailDTO
+                          {
+                              ScheduleId = schedule.Id,
+                              StartDateTime = schedule.StartDateTime,
+                              EndDateTime = schedule.EndDateTime,
+                              Location = schedule.Location,
+                              StudioName = studio.Name,
+                              GroupName = g != null ? g.Name : null
+                          })
+        .ToListAsync();
         }
     }
 }
