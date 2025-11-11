@@ -90,5 +90,20 @@ namespace ScheduleMaster.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<List<GroupWithDetailsDTO>> GetGroupsWithDetailsAsync()
+        {
+            return await (from g in _context.Groups
+                          join studio in _context.Studios on g.StudioId equals studio.Id
+                          select new GroupWithDetailsDTO
+                          {
+                              GroupId = g.Id,
+                              GroupName = g.Name,
+                              StudioName = studio.Name,
+                              MemberCount = _context.GroupMemberships.Count(gm => gm.GroupId == g.Id),
+                              ScheduleCount = _context.Schedules.Count(s => s.GroupId == g.Id)
+                          })
+                          .ToListAsync();
+        }
     }
 }

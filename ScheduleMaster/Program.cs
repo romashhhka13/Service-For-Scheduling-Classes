@@ -4,6 +4,7 @@ using ScheduleMaster.Services;
 using ScheduleMaster.Security;
 using ScheduleMaster.Extensions;
 using Microsoft.AspNetCore.CookiePolicy;
+using ScheduleMaster.DbSeader;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,8 +27,24 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+
 if (app.Environment.IsDevelopment())
 {
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+
+        var context = services.GetRequiredService<ScheduleMasterDbContext>();
+        var userService = services.GetRequiredService<UserService>();
+        var studioService = services.GetRequiredService<StudioService>();
+        var groupService = services.GetRequiredService<GroupService>();
+        var scheduleService = services.GetRequiredService<ScheduleService>();
+
+        Console.WriteLine("Начинаем инициализацию данных...");
+        await DbSeeder.SeedAsync(context, userService, studioService, groupService, scheduleService);
+        Console.WriteLine("Инициализация данных завершена.");
+    }
+
     app.MapOpenApi("/openapi/v1.json");
     app.UseSwaggerUi(options =>
     {

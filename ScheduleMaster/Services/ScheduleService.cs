@@ -73,8 +73,8 @@ namespace ScheduleMaster.Services
                 Id = Guid.NewGuid(),
                 StudioId = createDTO.StudioId,
                 GroupId = createDTO.GroupId,
-                StartDateTime = createDTO.StartDateTime,
-                EndDateTime = createDTO.EndDateTime,
+                StartDateTime = createDTO.StartDateTime.ToUniversalTime(),
+                EndDateTime = createDTO.EndDateTime.ToUniversalTime(),
                 Location = createDTO.Location,
                 WeekType = createDTO.WeekType,
                 IsRecurring = createDTO.IsRecurring
@@ -144,12 +144,12 @@ namespace ScheduleMaster.Services
             return true;
         }
 
-        // LINQ запрос: получить расписания для конкретной группы
+        // Получить расписания для конкретной группы
         public async Task<List<ScheduleDTO>> GetSchedulesByGroupIdAsync(Guid groupId)
         {
-            // var groupExists = await _context.Groups.AnyAsync(group => group.Id == groupId);
-            // if (!groupExists)
-            //     throw new Exception($"Группа с ID '{groupId}' не найдена");
+            var groupExists = await _context.Groups.AnyAsync(group => group.Id == groupId);
+            if (!groupExists)
+                throw new Exception($"Группа с ID '{groupId}' не найдена");
 
             return await _context.Schedules
                 .Where(schedule => schedule.GroupId == groupId)
@@ -170,10 +170,8 @@ namespace ScheduleMaster.Services
         public async Task<List<ScheduleDetailDTO>> GetScheduleDetailsAsync()
         {
             return await (from schedule in _context.Schedules
-                          join studio in _context.Studios
-                              on schedule.StudioId equals studio.Id
-                          join g in _context.Groups
-                              on schedule.GroupId equals g.Id into groupJoin
+                          join studio in _context.Studios on schedule.StudioId equals studio.Id
+                          join g in _context.Groups on schedule.GroupId equals g.Id into groupJoin
                           from g in groupJoin.DefaultIfEmpty()
                           select new ScheduleDetailDTO
                           {

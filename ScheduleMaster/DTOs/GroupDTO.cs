@@ -17,4 +17,13 @@ namespace ScheduleMaster.DTOs
     {
         public string? Name { get; set; }
     }
+
+    public class GroupWithDetailsDTO
+    {
+        public Guid GroupId { get; set; }
+        public required string GroupName { get; set; }
+        public required string StudioName { get; set; }
+        public int MemberCount { get; set; }
+        public int ScheduleCount { get; set; }
+    }
 }

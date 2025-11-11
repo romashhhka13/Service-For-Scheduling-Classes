@@ -152,5 +152,32 @@ namespace ScheduleMaster.Services
             return true;
         }
 
+        // UserService.cs
+        public async Task<List<StudentScheduleDTO>> GetStudentScheduleAsync(Guid studentId)
+        {
+            var userExist = await _context.Users.AnyAsync(user => user.Id == studentId);
+            if (!userExist)
+                throw new Exception($"Пользователя не существует");
+
+            return await (from gm in _context.GroupMemberships
+                          join g in _context.Groups on gm.GroupId equals g.Id
+                          join schedule in _context.Schedules on g.Id equals schedule.GroupId
+                          join studio in _context.Studios on schedule.StudioId equals studio.Id
+                          where gm.StudentId == studentId
+                          select new StudentScheduleDTO
+                          {
+                              ScheduleId = schedule.Id,
+                              StudioName = studio.Name,
+                              GroupName = g.Name,
+                              StartDateTime = schedule.StartDateTime,
+                              EndDateTime = schedule.EndDateTime,
+                              Location = schedule.Location,
+                              WeekType = schedule.WeekType
+                          })
+                          .OrderBy(s => s.StartDateTime)
+                          .ToListAsync();
+        }
+
+
     }
 }

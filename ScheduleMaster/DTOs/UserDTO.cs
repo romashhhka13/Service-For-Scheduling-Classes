@@ -44,4 +44,15 @@ namespace ScheduleMaster.DTOs
     //     public string NewPassword { get; set; } = null!;
     // }
 
+    public class StudentScheduleDTO
+    {
+        public Guid ScheduleId { get; set; }
+        public required string StudioName { get; set; }
+        public required string GroupName { get; set; }
+        public DateTime StartDateTime { get; set; }
+        public DateTime EndDateTime { get; set; }
+        public string? Location { get; set; }
+        public string? WeekType { get; set; }
+    }
+
 }

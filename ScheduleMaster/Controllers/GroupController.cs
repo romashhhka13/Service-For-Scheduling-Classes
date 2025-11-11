@@ -73,5 +73,13 @@ namespace ScheduleMaster.Controllers
                 return NotFound(new { message = "Group not found" });
             return NoContent();
         }
+
+        [HttpGet("details")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> GetGroupDetails()
+        {
+            var groups = await _groupService.GetGroupsWithDetailsAsync();
+            return Ok(groups);
+        }
     }
 }

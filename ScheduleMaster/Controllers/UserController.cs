@@ -84,6 +84,21 @@ namespace ScheduleMaster.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("{id}/schedule")]
+        [Authorize(Roles = "admin, user")]
+        public async Task<IActionResult> GetUserSchedule(Guid id)
+        {
+            try
+            {
+                var schedule = await _userService.GetStudentScheduleAsync(id);
+                return Ok(schedule);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
 
