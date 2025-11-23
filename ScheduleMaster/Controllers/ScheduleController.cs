@@ -9,92 +9,92 @@ namespace ScheduleMaster.Controllers
     [Route("api/schedule")]
     public class ScheduleController : ControllerBase
     {
-        private readonly ScheduleService _scheduleService;
+        // private readonly ScheduleService _scheduleService;
 
-        public ScheduleController(ScheduleService scheduleService)
-        {
-            _scheduleService = scheduleService;
-        }
+        // public ScheduleController(ScheduleService scheduleService)
+        // {
+        //     _scheduleService = scheduleService;
+        // }
 
-        // GET: api/schedule
-        [HttpGet]
-        [Authorize(Roles = "admin")]
-        public async Task<IActionResult> GetAll()
-        {
-            var schedules = await _scheduleService.GetAllSchedulesAsync();
-            return Ok(schedules);
-        }
+        // // GET: api/schedule
+        // [HttpGet]
+        // [Authorize(Roles = "admin")]
+        // public async Task<IActionResult> GetAll()
+        // {
+        //     var schedules = await _scheduleService.GetAllSchedulesAsync();
+        //     return Ok(schedules);
+        // }
 
-        // GET: api/schedule/{id}
-        [HttpGet("{id}")]
-        [Authorize(Roles = "admin, user")]
-        public async Task<IActionResult> GetScheduleById(Guid id)
-        {
-            var schedule = await _scheduleService.GetScheduleByIdAsync(id);
-            if (schedule == null)
-                return NotFound(new { message = "Schedule not found" });
-            return Ok(schedule);
-        }
+        // // GET: api/schedule/{id}
+        // [HttpGet("{id}")]
+        // [Authorize(Roles = "admin, user")]
+        // public async Task<IActionResult> GetScheduleById(Guid id)
+        // {
+        //     var schedule = await _scheduleService.GetScheduleByIdAsync(id);
+        //     if (schedule == null)
+        //         return NotFound(new { message = "Schedule not found" });
+        //     return Ok(schedule);
+        // }
 
-        // POST: api/schedule
-        [HttpPost]
-        [Authorize(Roles = "admin, user")]
-        public async Task<IActionResult> Create([FromBody] CreateScheduleDTO createDTO)
-        {
-            try
-            {
-                var schedule = await _scheduleService.CreateScheduleAsync(createDTO);
-                return CreatedAtAction(nameof(GetScheduleById), new { id = schedule.Id }, schedule);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        // // POST: api/schedule
+        // [HttpPost]
+        // [Authorize(Roles = "admin, user")]
+        // public async Task<IActionResult> Create([FromBody] CreateScheduleDTO createDTO)
+        // {
+        //     try
+        //     {
+        //         var schedule = await _scheduleService.CreateScheduleAsync(createDTO);
+        //         return CreatedAtAction(nameof(GetScheduleById), new { id = schedule.Id }, schedule);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return BadRequest(new { message = ex.Message });
+        //     }
+        // }
 
-        // Patch: api/schedule/{id}
-        [HttpPatch("{id}")]
-        [Authorize(Roles = "admin, user")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateScheduleDTO updateDTO)
-        {
-            try
-            {
-                var schedule = await _scheduleService.UpdateScheduleAsync(id, updateDTO);
-                if (schedule == null)
-                    return NotFound(new { message = "Schedule not found" });
-                return Ok(schedule);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        // // Patch: api/schedule/{id}
+        // [HttpPatch("{id}")]
+        // [Authorize(Roles = "admin, user")]
+        // public async Task<IActionResult> Update(Guid id, [FromBody] UpdateScheduleDTO updateDTO)
+        // {
+        //     try
+        //     {
+        //         var schedule = await _scheduleService.UpdateScheduleAsync(id, updateDTO);
+        //         if (schedule == null)
+        //             return NotFound(new { message = "Schedule not found" });
+        //         return Ok(schedule);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return BadRequest(new { message = ex.Message });
+        //     }
+        // }
 
-        // DELETE: api/schedule/{id}
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "admin, user")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var result = await _scheduleService.DeleteScheduleAsync(id);
-            if (!result)
-                return NotFound(new { message = "Schedule not found" });
-            return NoContent();
-        }
+        // // DELETE: api/schedule/{id}
+        // [HttpDelete("{id}")]
+        // [Authorize(Roles = "admin, user")]
+        // public async Task<IActionResult> Delete(Guid id)
+        // {
+        //     var result = await _scheduleService.DeleteScheduleAsync(id);
+        //     if (!result)
+        //         return NotFound(new { message = "Schedule not found" });
+        //     return NoContent();
+        // }
 
-        // GET: api/schedule/by-group/{groupId}
-        [HttpGet("by-group/{groupId}")]
-        public async Task<IActionResult> GetByGroup(Guid groupId)
-        {
-            var schedules = await _scheduleService.GetSchedulesByGroupIdAsync(groupId);
-            return Ok(schedules);
-        }
+        // // GET: api/schedule/group/{groupId}
+        // [HttpGet("group/{groupId}")]
+        // public async Task<IActionResult> GetByGroup(Guid groupId)
+        // {
+        //     var schedules = await _scheduleService.GetSchedulesByGroupIdAsync(groupId);
+        //     return Ok(schedules);
+        // }
 
-        [HttpGet("details")]
-        public async Task<IActionResult> GetScheduleDetails()
-        {
-            var details = await _scheduleService.GetScheduleDetailsAsync();
-            return Ok(details);
-        }
+        // [HttpGet("details")]
+        // public async Task<IActionResult> GetScheduleDetails()
+        // {
+        //     var details = await _scheduleService.GetScheduleDetailsAsync();
+        //     return Ok(details);
+        // }
 
     }
 }

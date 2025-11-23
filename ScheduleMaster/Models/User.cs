@@ -1,6 +1,5 @@
 namespace ScheduleMaster.Models
 {
-
     public class User
     {
 
@@ -13,7 +12,6 @@ namespace ScheduleMaster.Models
         public required string Role { get; set; }
         public string? Faculty { get; set; }
         public string? GroupName { get; set; }
-        public short? Course { get; set; }
     }
 
 }

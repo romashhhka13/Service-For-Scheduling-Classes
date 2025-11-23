@@ -1,9 +1,8 @@
 namespace ScheduleMaster.Models
 {
-
-    public class GroupMembership
+    public class EventGroup
     {
-        public Guid StudentId { get; set; }
+        public Guid EventId { get; set; }
         public Guid GroupId { get; set; }
     }
 }

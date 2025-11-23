@@ -223,6 +223,14 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "/details",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
 				}
 			]
 		},
@@ -704,6 +712,14 @@
 								}
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "/api/user/{id}/schedule",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}

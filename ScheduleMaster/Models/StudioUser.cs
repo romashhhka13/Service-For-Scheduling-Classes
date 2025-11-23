@@ -1,11 +1,10 @@
 namespace ScheduleMaster.Models
 {
-
-    // Models/GroupMembership.cs
-    public class StudioMembership
+    public class StudioUser
     {
         public Guid StudentId { get; set; }
         public Guid StudioId { get; set; }
+        public required string studio_role;
     }
 
 }

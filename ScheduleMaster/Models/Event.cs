@@ -1,15 +1,12 @@
 namespace ScheduleMaster.Models
 {
 
-    public class Schedule
+    public class Event
     {
         public Guid Id { get; set; }
-        public Guid StudioId { get; set; }
-        public Guid? GroupId { get; set; }
+        public required string Title { get; set; }
         public DateTime StartDateTime { get; set; }
         public DateTime EndDateTime { get; set; }
         public string? Location { get; set; }
-        public string? WeekType { get; set; }
-        public bool IsRecurring { get; set; }
     }
 }

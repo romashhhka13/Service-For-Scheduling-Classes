@@ -22,27 +22,79 @@ namespace ScheduleMaster.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ScheduleMaster.Models.Event", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("StartDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("events", (string)null);
+                });
+
+            modelBuilder.Entity("ScheduleMaster.Models.EventGroup", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("EventId", "GroupId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("events_groups", (string)null);
+                });
+
+            modelBuilder.Entity("ScheduleMaster.Models.EventStudio", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("EventId", "StudioId");
+
+                    b.HasIndex("StudioId");
+
+                    b.ToTable("events_studios", (string)null);
+                });
+
             modelBuilder.Entity("ScheduleMaster.Models.Group", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<Guid>("StudioId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.HasIndex("StudioId");
+                    b.HasKey("Id");
 
                     b.ToTable("groups", (string)null);
                 });
 
-            modelBuilder.Entity("ScheduleMaster.Models.GroupMembership", b =>
+            modelBuilder.Entity("ScheduleMaster.Models.GroupUser", b =>
                 {
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
@@ -54,46 +106,7 @@ namespace ScheduleMaster.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.HasIndex("StudentId", "GroupId")
-                        .IsUnique();
-
-                    b.ToTable("group_memberships", (string)null);
-                });
-
-            modelBuilder.Entity("ScheduleMaster.Models.Schedule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("EndDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("GroupId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsRecurring")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Location")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("StartDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("StudioId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("WeekType")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("StudioId");
-
-                    b.ToTable("schedules", (string)null);
+                    b.ToTable("groups_users", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleMaster.Models.Studio", b =>
@@ -102,25 +115,36 @@ namespace ScheduleMaster.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AdministratorId")
+                    b.Property<Guid?>("StudioCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudioCategoryId");
+
+                    b.ToTable("studios", (string)null);
+                });
+
+            modelBuilder.Entity("ScheduleMaster.Models.StudioCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("AdministratorId");
-
-                    b.ToTable("studios", (string)null);
+                    b.ToTable("studio_categories", (string)null);
                 });
 
-            modelBuilder.Entity("ScheduleMaster.Models.StudioMembership", b =>
+            modelBuilder.Entity("ScheduleMaster.Models.StudioUser", b =>
                 {
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uuid");
@@ -132,7 +156,7 @@ namespace ScheduleMaster.Migrations
 
                     b.HasIndex("StudioId");
 
-                    b.ToTable("studio_memberships", (string)null);
+                    b.ToTable("studios_users", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleMaster.Models.User", b =>
@@ -140,9 +164,6 @@ namespace ScheduleMaster.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<short?>("Course")
-                        .HasColumnType("smallint");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -181,8 +202,29 @@ namespace ScheduleMaster.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("ScheduleMaster.Models.Group", b =>
+            modelBuilder.Entity("ScheduleMaster.Models.EventGroup", b =>
                 {
+                    b.HasOne("ScheduleMaster.Models.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ScheduleMaster.Models.Group", null)
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ScheduleMaster.Models.EventStudio", b =>
+                {
+                    b.HasOne("ScheduleMaster.Models.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ScheduleMaster.Models.Studio", null)
                         .WithMany()
                         .HasForeignKey("StudioId")
@@ -190,7 +232,7 @@ namespace ScheduleMaster.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ScheduleMaster.Models.GroupMembership", b =>
+            modelBuilder.Entity("ScheduleMaster.Models.GroupUser", b =>
                 {
                     b.HasOne("ScheduleMaster.Models.Group", null)
                         .WithMany()
@@ -205,30 +247,15 @@ namespace ScheduleMaster.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ScheduleMaster.Models.Schedule", b =>
-                {
-                    b.HasOne("ScheduleMaster.Models.Group", null)
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("ScheduleMaster.Models.Studio", null)
-                        .WithMany()
-                        .HasForeignKey("StudioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("ScheduleMaster.Models.Studio", b =>
                 {
-                    b.HasOne("ScheduleMaster.Models.User", null)
+                    b.HasOne("ScheduleMaster.Models.StudioCategory", null)
                         .WithMany()
-                        .HasForeignKey("AdministratorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("StudioCategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
-            modelBuilder.Entity("ScheduleMaster.Models.StudioMembership", b =>
+            modelBuilder.Entity("ScheduleMaster.Models.StudioUser", b =>
                 {
                     b.HasOne("ScheduleMaster.Models.User", null)
                         .WithMany()
