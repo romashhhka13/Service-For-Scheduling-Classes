@@ -166,7 +166,8 @@ namespace ScheduleMaster.Migrations
                 columns: table => new
                 {
                     StudentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    StudioId = table.Column<Guid>(type: "uuid", nullable: false)
+                    StudioId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudioRole = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

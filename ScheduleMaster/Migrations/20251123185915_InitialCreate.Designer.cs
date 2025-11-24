@@ -12,7 +12,7 @@ using ScheduleMaster.Data;
 namespace ScheduleMaster.Migrations
 {
     [DbContext(typeof(ScheduleMasterDbContext))]
-    [Migration("20251123174959_InitialCreate")]
+    [Migration("20251123185915_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -154,6 +154,10 @@ namespace ScheduleMaster.Migrations
 
                     b.Property<Guid>("StudioId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("StudioRole")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("StudentId", "StudioId");
 

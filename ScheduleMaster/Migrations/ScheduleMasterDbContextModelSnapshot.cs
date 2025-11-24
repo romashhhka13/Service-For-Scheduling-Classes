@@ -152,6 +152,10 @@ namespace ScheduleMaster.Migrations
                     b.Property<Guid>("StudioId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("StudioRole")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("StudentId", "StudioId");
 
                     b.HasIndex("StudioId");

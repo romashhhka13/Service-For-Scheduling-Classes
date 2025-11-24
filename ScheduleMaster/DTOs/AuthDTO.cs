@@ -10,7 +10,6 @@ namespace ScheduleMaster.DTOs
         public required string Role { get; set; } = "user";
         public string? Faculty { get; set; }
         public string? GroupName { get; set; }
-        public short? Course { get; set; }
     }
 
     public class RegisterResponseDTO
@@ -22,7 +21,6 @@ namespace ScheduleMaster.DTOs
         public required string Role { get; set; }
         public string? Faculty { get; set; }
         public string? GroupName { get; set; }
-        public short? Course { get; set; }
     }
 
     public class LoginRequestDTO

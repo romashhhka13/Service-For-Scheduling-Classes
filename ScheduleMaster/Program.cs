@@ -35,13 +35,9 @@ if (app.Environment.IsDevelopment())
         var services = scope.ServiceProvider;
 
         var context = services.GetRequiredService<ScheduleMasterDbContext>();
-        var userService = services.GetRequiredService<UserService>();
-        var studioService = services.GetRequiredService<StudioService>();
-        var groupService = services.GetRequiredService<GroupService>();
-        var scheduleService = services.GetRequiredService<ScheduleService>();
 
         Console.WriteLine("Начинаем инициализацию данных...");
-        await DbSeeder.SeedAsync(context, userService, studioService, groupService, scheduleService);
+        await DbSeeder.SeedAsync(context);
         Console.WriteLine("Инициализация данных завершена.");
     }
 
