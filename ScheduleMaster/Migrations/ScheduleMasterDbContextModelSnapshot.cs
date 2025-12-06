@@ -91,6 +91,8 @@ namespace ScheduleMaster.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("StudioId");
+
                     b.ToTable("groups", (string)null);
                 });
 
@@ -152,9 +154,8 @@ namespace ScheduleMaster.Migrations
                     b.Property<Guid>("StudioId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("StudioRole")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<bool>("IsLeader")
+                        .HasColumnType("boolean");
 
                     b.HasKey("StudentId", "StudioId");
 
@@ -229,6 +230,15 @@ namespace ScheduleMaster.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ScheduleMaster.Models.Studio", null)
+                        .WithMany()
+                        .HasForeignKey("StudioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ScheduleMaster.Models.Group", b =>
+                {
                     b.HasOne("ScheduleMaster.Models.Studio", null)
                         .WithMany()
                         .HasForeignKey("StudioId")

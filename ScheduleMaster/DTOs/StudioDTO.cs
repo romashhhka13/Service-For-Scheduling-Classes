@@ -1,23 +1,23 @@
 namespace ScheduleMaster.DTOs
 {
-    public class StudioDTO
+
+    public class CreateStudioRequestDTO
+    {
+        public string Title { get; set; } = null!;
+        public Guid? CategoryId { get; set; }
+    }
+
+    public class UpdateStudioRequestDTO
+    {
+        public string? Title { get; set; }
+        public Guid? CategoryId { get; set; }
+    }
+
+    public class StudioResponseDTO
     {
         public Guid Id { get; set; }
-        public required string Name { get; set; }
-        public required string Category { get; set; }
-        public Guid AdministratorId { get; set; }
+        public string Title { get; set; } = null!;
+        public Guid? CategoryId { get; set; }
     }
 
-    public class CreateStudioDTO
-    {
-        public required string Name { get; set; }
-        public required string Category { get; set; }
-        public Guid AdministratorId { get; set; }
-    }
-
-    public class UpdateStudioDTO
-    {
-        public string? Name { get; set; }
-        public string? Category { get; set; }
-    }
 }

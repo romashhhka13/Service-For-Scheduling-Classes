@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ScheduleMaster.DTOs;
+using ScheduleMaster.Helpers;
 using ScheduleMaster.Services;
 
 namespace ScheduleMaster.Controllers
@@ -9,72 +10,118 @@ namespace ScheduleMaster.Controllers
     [Route("api/studio")]
     public class StudioController : ControllerBase
     {
-        // private readonly StudioService _studioService;
+        private readonly StudioService _studioService;
 
-        // public StudioController(StudioService studioService)
-        // {
-        //     _studioService = studioService;
-        // }
+        public StudioController(StudioService studioService)
+        {
+            _studioService = studioService;
+        }
 
-        // // GET: api/studio
-        // [HttpGet]
-        // [Authorize(Roles = "admin")]
-        // public async Task<IActionResult> GetAll()
-        // {
-        //     var studios = await _studioService.GetAllStudiosAsync();
-        //     return Ok(studios);
-        // }
+        [HttpPost]
+        [Authorize(Roles = "user")]
+        public async Task<IActionResult> CreateStudio([FromBody] CreateStudioRequestDTO dto)
+        {
+            try
+            {
+                var studioId = await _studioService.CreateStudioAsync(dto, Guid.Parse(User.FindFirst("userId")?.Value!));
+                return Ok(studioId);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
 
-        // // GET: api/studio/{id}
-        // [HttpGet("{id}")]
-        // [Authorize(Roles = "admin, user")]
-        // public async Task<IActionResult> GetStudioById(Guid id)
-        // {
-        //     var studio = await _studioService.GetStudioByIdAsync(id);
-        //     if (studio == null)
-        //         return NotFound(new { message = "Studio not found" });
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "user")]
+        public async Task<IActionResult> DeleteStudio([FromRoute] Guid id)
+        {
+            try
+            {
+                await _studioService.DeleteStudioAsync(id, User);
+                return Ok();
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
 
-        //     return Ok(studio);
-        // }
+        [HttpPut("{id}")]
+        [Authorize(Roles = "user")]
+        public async Task<IActionResult> UpdateStudio([FromRoute] Guid id, [FromBody] UpdateStudioRequestDTO dto)
+        {
+            try
+            {
+                await _studioService.UpdateStudioAsync(id, dto, User);
+                return Ok();
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
 
-        // // POST: api/studio
-        // [HttpPost]
-        // [Authorize(Roles = "admin, user")]
-        // public async Task<IActionResult> Create([FromBody] CreateStudioDTO createDTO)
-        // {
-        //     try
-        //     {
-        //         var studio = await _studioService.CreateStudioAsync(createDTO);
-        //         return CreatedAtAction(nameof(GetStudioById), new { id = studio.Id }, studio); // 201
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return BadRequest(new { message = ex.Message });
-        //     }
-        // }
+        [HttpGet("user/member/{userId}")]
+        [Authorize(Roles = "user")]
+        public async Task<IActionResult> GetStudiosAsMember(Guid userId)
+        {
+            try
+            {
+                var studios = await _studioService.GetStudiosAsMemberAsync(userId, User);
+                return Ok(studios);
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
 
-        // // Patch: api/studio/{id}
-        // [HttpPatch("{id}")]
-        // [Authorize(Roles = "admin, user")]
-        // public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStudioDTO updateDTO)
-        // {
-        //     var studio = await _studioService.UpdateStudioAsync(id, updateDTO);
-        //     if (studio == null)
-        //         return NotFound(new { message = "Studio not found" });
-
-        //     return Ok(studio);
-        // }
-
-        // // DELETE: api/studio/{id}
-        // [HttpDelete("{id}")]
-        // [Authorize(Roles = "admin, user")]
-        // public async Task<IActionResult> Delete(Guid id)
-        // {
-        //     var result = await _studioService.DeleteStudioAsync(id);
-        //     if (!result)
-        //         return NotFound(new { message = "Studio not found" });
-
-        //     return NoContent();
-        // }
+        [HttpGet("user/leader/{userId}")]
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> GetStudiosAsLeader(Guid userId)
+        {
+            try
+            {
+                var studios = await _studioService.GetStudiosAsLeaderAsync(userId, User);
+                return Ok(studios);
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
     }
 }

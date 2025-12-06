@@ -4,7 +4,7 @@ namespace ScheduleMaster.Models
     {
         public Guid StudentId { get; set; }
         public Guid StudioId { get; set; }
-        public required string StudioRole { get; set; }
+        public bool IsLeader { get; set; }
     }
 
 }

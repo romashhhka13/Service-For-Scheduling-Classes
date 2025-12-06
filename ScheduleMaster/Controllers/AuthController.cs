@@ -1,8 +1,7 @@
 using ScheduleMaster.Services;
 using ScheduleMaster.DTOs;
-using ScheduleMaster.Models;
 using Microsoft.AspNetCore.Mvc;
-using YamlDotNet.Core.Tokens;
+using ScheduleMaster.Helpers;
 
 namespace ScheduleMaster.Controllers
 {
@@ -19,22 +18,26 @@ namespace ScheduleMaster.Controllers
 
         // Post: api/auth/register 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequestDTO registerDTO)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDTO registerDTO)
         {
             try
             {
                 var response = await _authService.RegisterAsync(registerDTO);
                 return Ok(response);
             }
-            catch (Exception ex)
+            catch (BadRequestExceptions ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
             }
         }
 
         // Post: api/auth/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequestDTO loginDTO)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginDTO)
         {
             try
             {
@@ -42,9 +45,13 @@ namespace ScheduleMaster.Controllers
                 Response.Cookies.Append("cookie", response.Token);
                 return Ok(response);
             }
-            catch (Exception ex)
+            catch (UnauthorizedExceptions ex)
             {
                 return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
             }
         }
     }

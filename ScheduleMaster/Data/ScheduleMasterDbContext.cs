@@ -50,6 +50,12 @@ namespace ScheduleMaster.Data
             modelBuilder.Entity<Group>().ToTable("groups")
                 .HasKey(group => group.Id);
 
+            modelBuilder.Entity<Group>()
+                .HasOne<Studio>()
+                .WithMany()
+                .HasForeignKey(group => group.StudioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // studios_users
             modelBuilder.Entity<StudioUser>().ToTable("studios_users")
                 .HasKey(studios_users => new { studios_users.StudentId, studios_users.StudioId });

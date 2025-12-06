@@ -27,19 +27,6 @@ namespace ScheduleMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "groups",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    StudioId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_groups", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "studio_categories",
                 columns: table => new
                 {
@@ -71,30 +58,6 @@ namespace ScheduleMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "events_groups",
-                columns: table => new
-                {
-                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
-                    GroupId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_events_groups", x => new { x.EventId, x.GroupId });
-                    table.ForeignKey(
-                        name: "FK_events_groups_events_EventId",
-                        column: x => x.EventId,
-                        principalTable: "events",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_events_groups_groups_GroupId",
-                        column: x => x.GroupId,
-                        principalTable: "groups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "studios",
                 columns: table => new
                 {
@@ -111,30 +74,6 @@ namespace ScheduleMaster.Migrations
                         principalTable: "studio_categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "groups_users",
-                columns: table => new
-                {
-                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    GroupId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_groups_users", x => new { x.StudentId, x.GroupId });
-                    table.ForeignKey(
-                        name: "FK_groups_users_groups_GroupId",
-                        column: x => x.GroupId,
-                        principalTable: "groups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_groups_users_users_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -162,12 +101,31 @@ namespace ScheduleMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "groups",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    StudioId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_groups", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_groups_studios_StudioId",
+                        column: x => x.StudioId,
+                        principalTable: "studios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "studios_users",
                 columns: table => new
                 {
                     StudentId = table.Column<Guid>(type: "uuid", nullable: false),
                     StudioId = table.Column<Guid>(type: "uuid", nullable: false),
-                    StudioRole = table.Column<string>(type: "text", nullable: false)
+                    IsLeader = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -186,6 +144,54 @@ namespace ScheduleMaster.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "events_groups",
+                columns: table => new
+                {
+                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GroupId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_events_groups", x => new { x.EventId, x.GroupId });
+                    table.ForeignKey(
+                        name: "FK_events_groups_events_EventId",
+                        column: x => x.EventId,
+                        principalTable: "events",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_events_groups_groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "groups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "groups_users",
+                columns: table => new
+                {
+                    StudentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GroupId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_groups_users", x => new { x.StudentId, x.GroupId });
+                    table.ForeignKey(
+                        name: "FK_groups_users_groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "groups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_groups_users_users_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_events_groups_GroupId",
                 table: "events_groups",
@@ -194,6 +200,11 @@ namespace ScheduleMaster.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_events_studios_StudioId",
                 table: "events_studios",
+                column: "StudioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_groups_StudioId",
+                table: "groups",
                 column: "StudioId");
 
             migrationBuilder.CreateIndex(
@@ -240,10 +251,10 @@ namespace ScheduleMaster.Migrations
                 name: "groups");
 
             migrationBuilder.DropTable(
-                name: "studios");
+                name: "users");
 
             migrationBuilder.DropTable(
-                name: "users");
+                name: "studios");
 
             migrationBuilder.DropTable(
                 name: "studio_categories");

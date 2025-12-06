@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ScheduleMaster.Data;
 using ScheduleMaster.DTOs;
+using ScheduleMaster.Helpers;
 using ScheduleMaster.Models;
 using ScheduleMaster.Services;
 
@@ -19,31 +20,31 @@ namespace ScheduleMaster.DbSeader
             // Вокальная студия "Вдохновение" - уникальные участники с вымышленными именами
             var vocalUsers = new[]
             {
-                new { Surname = "Смирнова", Name = "Виктория", MiddleName = "Валерьевна", Email = "smirnova.v1@mail.ru", Group = "ХТ-22-06", Faculty = "Факультет химической технологии", IsLeader = false },
-                new { Surname = "Кузнецова", Name = "Маргарита", MiddleName = "Юрьевна", Email = "kuznetsova.m1@mail.ru", Group = "ХТ-22-07", Faculty = "Факультет химической технологии", IsLeader = false },
-                new { Surname = "Волкова", Name = "Вера", MiddleName = "Владиславовна", Email = "volkova.v1@mail.ru", Group = "МСМ-24-06", Faculty = "Факультет машиностроения", IsLeader = false },
-                new { Surname = "Сорокина", Name = "Екатерина", MiddleName = "Дмитриевна", Email = "sorokina.e1@mail.ru", Group = "КЗ-21-12", Faculty = "Факультет комплексной безопасности", IsLeader = false },
-                new { Surname = "Павлова", Name = "Валерия", MiddleName = "Андреевна", Email = "pavlova.v1@mail.ru", Group = "ТП-25-04", Faculty = "Факультет трубопроводного транспорта", IsLeader = false },
-                new { Surname = "Морозова", Name = "Антонина", MiddleName = "Руслановна", Email = "morozova.a1@mail.ru", Group = "ЭЭв-22-02", Faculty = "Факультет электроэнергетики", IsLeader = false },
-                new { Surname = "Петров", Name = "Степан", MiddleName = "Дмитриевич", Email = "petrov.s1@mail.ru", Group = "КА-21-07", Faculty = "Факультет автоматизации и вычислительной техники", IsLeader = false },
-                new { Surname = "Сергеева", Name = "Екатерина", MiddleName = "Николаевна", Email = "sergeeva.e1@mail.ru", Group = "РИ-25-12", Faculty = "Факультет разведки и инжиниринга", IsLeader = false },
-                new { Surname = "Иванов", Name = "Роман", MiddleName = "Сергеевич", Email = "ivanov.r1@mail.ru", Group = "АС-22-05", Faculty = "Факультет автоматики систем", IsLeader = false },
-                new { Surname = "Александров", Name = "Давид", MiddleName = "Геннадьевич", Email = "aleksandrov.d1@mail.ru", Group = "КЦ-25-08", Faculty = "Факультет экономики и управления", IsLeader = false },
-                new { Surname = "Лебедева", Name = "Виталина", MiddleName = "Вениаминовна", Email = "lebedeva.v1@mail.ru", Group = "КБ-23-19", Faculty = "Факультет биотехнологий", IsLeader = false },
-                new { Surname = "Соколова", Name = "Милана", MiddleName = "Павловна", Email = "sokolova.m1@mail.ru", Group = "КН-25-09", Faculty = "Факультет нефтегазовых технологий", IsLeader = false },
-                new { Surname = "Андреева", Name = "Мария", MiddleName = "Евгеньевна", Email = "andreeva.m1@mail.ru", Group = "БМ-25-03", Faculty = "Факультет бизнеса и менеджмента", IsLeader = false },
-                new { Surname = "Новиков", Name = "Виктор", MiddleName = "", Email = "novikov.v1@mail.ru", Group = "БМ-25-03", Faculty = "Факультет бизнеса и менеджмента", IsLeader = false },
-                new { Surname = "Орлов", Name = "Александр", MiddleName = "Викторович", Email = "orlov.a1@mail.ru", Group = "МР-25-02", Faculty = "Факультет механики и робототехники", IsLeader = false },
-                new { Surname = "Федорова", Name = "Дарья", MiddleName = "Андреевна", Email = "fedorova.d1@mail.ru", Group = "КН-24-10", Faculty = "Факультет нефтегазовых технологий", IsLeader = false },
-                new { Surname = "Романова", Name = "Елена", MiddleName = "", Email = "romanova.e1@mail.ru", Group = "БМ-24-04", Faculty = "Факультет бизнеса и менеджмента", IsLeader = false },
-                new { Surname = "Белова", Name = "Наталья", MiddleName = "", Email = "belova.n1@mail.ru", Group = "КН-22-08", Faculty = "Факультет нефтегазовых технологий", IsLeader = false },
-                new { Surname = "Козлова", Name = "Анна", MiddleName = "", Email = "kozlova.a1@mail.ru", Group = "ХТ-24-08", Faculty = "Факультет химической технологии", IsLeader = false },
-                new { Surname = "Лаврин", Name = "Никита", MiddleName = "", Email = "lavrin.n1@mail.ru", Group = "РБ-24-01", Faculty = "Факультет разведки и инжиниринга", IsLeader = false },
-                new { Surname = "Гавриков", Name = "Кирилл", MiddleName = "", Email = "gavrikov.k1@mail.ru", Group = "АС-23-05", Faculty = "Факультет автоматики систем", IsLeader = false },
-                new { Surname = "Комаров", Name = "Игорь", MiddleName = "", Email = "komarov.i1@mail.ru", Group = "МТМ-25-03", Faculty = "Факультет машиностроения", IsLeader = false },
-                new { Surname = "Соловьев", Name = "Михаил", MiddleName = "", Email = "solovyev.m1@mail.ru", Group = "ТП-25-04", Faculty = "Факультет трубопроводного транспорта", IsLeader = false },
-                new { Surname = "Евстигнеев", Name = "Сергей", MiddleName = "", Email = "evstigneev.s1@mail.ru", Group = "КА-22-05", Faculty = "Факультет автоматизации и вычислительной техники", IsLeader = false },
-                new { Surname = "Захаров", Name = "Виктор", MiddleName = "", Email = "zakharov.v1@mail.ru", Group = "КА-22-05", Faculty = "Факультет автоматизации и вычислительной техники", IsLeader = false },
+                new { Surname = "Смирнова", Name = "Виктория", MiddleName = "Валерьевна", Email = "smirnova.v1@mail.ru", Group = "ХТ-22-06", Faculty = "Факультет Химической технологии и экологии", IsLeader = false },
+                new { Surname = "Кузнецова", Name = "Маргарита", MiddleName = "Юрьевна", Email = "kuznetsova.m1@mail.ru", Group = "ХТ-22-07", Faculty = "Факультет Химической технологии и экологии", IsLeader = false },
+                new { Surname = "Волкова", Name = "Вера", MiddleName = "Владиславовна", Email = "volkova.v1@mail.ru", Group = "МСМ-24-06", Faculty = "Факультет Инженерной механики", IsLeader = false },
+                new { Surname = "Сорокина", Name = "Екатерина", MiddleName = "Дмитриевна", Email = "sorokina.e1@mail.ru", Group = "КЗ-21-12", Faculty = "Факультет Комплексной безопасности топливно-энергетического комплекса", IsLeader = false },
+                new { Surname = "Павлова", Name = "Валерия", MiddleName = "Андреевна", Email = "pavlova.v1@mail.ru", Group = "ТП-25-04", Faculty = "Факультет Проектирования, сооружения и эксплуатации систем трубопроводного транспорта", IsLeader = false },
+                new { Surname = "Морозова", Name = "Антонина", MiddleName = "Руслановна", Email = "morozova.a1@mail.ru", Group = "ЭЭв-22-02", Faculty = "Факультет Экономики и управления", IsLeader = false },
+                new { Surname = "Петров", Name = "Степан", MiddleName = "Дмитриевич", Email = "petrov.s1@mail.ru", Group = "КА-21-07", Faculty = "Факультет Комплексной безопасности топливно-энергетического комплекса", IsLeader = false },
+                new { Surname = "Сергеева", Name = "Екатерина", MiddleName = "Николаевна", Email = "sergeeva.e1@mail.ru", Group = "РИ-25-12", Faculty = "Факультет Разработки нефтяных и газовых месторождений", IsLeader = false },
+                new { Surname = "Иванов", Name = "Роман", MiddleName = "Сергеевич", Email = "ivanov.r1@mail.ru", Group = "АС-22-05", Faculty = "Факультет Автоматики и вычислительной техники", IsLeader = false },
+                new { Surname = "Александров", Name = "Давид", MiddleName = "Геннадьевич", Email = "aleksandrov.d1@mail.ru", Group = "КЦ-25-08", Faculty = "Факультет Комплексной безопасности топливно-энергетического комплекса", IsLeader = false },
+                new { Surname = "Лебедева", Name = "Виталина", MiddleName = "Вениаминовна", Email = "lebedeva.v1@mail.ru", Group = "КБ-23-19", Faculty = "Факультет Комплексной безопасности топливно-энергетического комплекса", IsLeader = false },
+                new { Surname = "Соколова", Name = "Милана", MiddleName = "Павловна", Email = "sokolova.m1@mail.ru", Group = "КН-25-09", Faculty = "Факультет Комплексной безопасности топливно-энергетического комплекса", IsLeader = false },
+                new { Surname = "Андреева", Name = "Мария", MiddleName = "Евгеньевна", Email = "andreeva.m1@mail.ru", Group = "БМ-25-03", Faculty = "Факультет Международного энергетического бизнеса", IsLeader = false },
+                new { Surname = "Новиков", Name = "Виктор", MiddleName = "", Email = "novikov.v1@mail.ru", Group = "БМ-25-03", Faculty = "Факультет Международного энергетического бизнеса", IsLeader = false },
+                new { Surname = "Орлов", Name = "Александр", MiddleName = "Викторович", Email = "orlov.a1@mail.ru", Group = "МР-25-02", Faculty = "Факультет Инженерной механики", IsLeader = false },
+                new { Surname = "Федорова", Name = "Дарья", MiddleName = "Андреевна", Email = "fedorova.d1@mail.ru", Group = "КН-24-10", Faculty = "Факультет Комплексной безопасности топливно-энергетического комплекса", IsLeader = false },
+                new { Surname = "Романова", Name = "Елена", MiddleName = "", Email = "romanova.e1@mail.ru", Group = "БМ-24-04", Faculty = "Факультет Международного энергетического бизнеса", IsLeader = false },
+                new { Surname = "Белова", Name = "Наталья", MiddleName = "", Email = "belova.n1@mail.ru", Group = "КН-22-08", Faculty = "Факультет Комплексной безопасности топливно-энергетического комплекса", IsLeader = false },
+                new { Surname = "Козлова", Name = "Анна", MiddleName = "", Email = "kozlova.a1@mail.ru", Group = "ХТ-24-08", Faculty = "Факультет Химической технологии и экологии", IsLeader = false },
+                new { Surname = "Лаврин", Name = "Никита", MiddleName = "", Email = "lavrin.n1@mail.ru", Group = "РБ-24-01", Faculty = "Факультет Разработки нефтяных и газовых месторождений", IsLeader = false },
+                new { Surname = "Гавриков", Name = "Кирилл", MiddleName = "", Email = "gavrikov.k1@mail.ru", Group = "АС-23-05", Faculty = "Факультет Автоматики и вычислительной техники", IsLeader = false },
+                new { Surname = "Комаров", Name = "Игорь", MiddleName = "", Email = "komarov.i1@mail.ru", Group = "МТМ-25-03", Faculty = "Факультет Инженерной механики", IsLeader = false },
+                new { Surname = "Соловьев", Name = "Михаил", MiddleName = "", Email = "solovyev.m1@mail.ru", Group = "ТП-25-04", Faculty = "Факультет Проектирования, сооружения и эксплуатации систем трубопроводного транспорта", IsLeader = false },
+                new { Surname = "Евстигнеев", Name = "Сергей", MiddleName = "", Email = "evstigneev.s1@mail.ru", Group = "КА-22-05", Faculty = "Факультет Комплексной безопасности топливно-энергетического комплекса", IsLeader = false },
+                new { Surname = "Захаров", Name = "Виктор", MiddleName = "", Email = "zakharov.v1@mail.ru", Group = "КА-22-05", Faculty = "Факультет Комплексной безопасности топливно-энергетического комплекса", IsLeader = false },
                 // Руководители (студий)
                 new { Surname = "Власова", Name = "Людмила", MiddleName = "", Email = "vlasova.l1@mail.ru", Group = "", Faculty = "", IsLeader = true },
                 new { Surname = "Васильев", Name = "Константин", MiddleName = "Максимович", Email = "vasiliev.k1@mail.ru", Group = "", Faculty = "", IsLeader = true }
@@ -89,7 +90,7 @@ namespace ScheduleMaster.DbSeader
                         Surname = u.Surname,
                         Name = u.Name,
                         MiddleName = u.MiddleName,
-                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("password"),
+                        PasswordHash = PasswordHasher.Generate("password1"),
                         Role = "user",
                         Faculty = u.Faculty,
                         GroupName = u.Group
@@ -112,21 +113,21 @@ namespace ScheduleMaster.DbSeader
                 var existingStudioUser = await context.StudiosUsers
                     .FirstOrDefaultAsync(x => x.StudentId == userId && x.StudioId == vocalStudio.Id);
 
-                string studioRole = u.IsLeader ? "руководитель" : "участник";
+                bool isLeader = u.IsLeader;
                 if (existingStudioUser == null)
                 {
                     context.StudiosUsers.Add(new StudioUser
                     {
                         StudentId = userId,
                         StudioId = vocalStudio.Id,
-                        StudioRole = studioRole
+                        IsLeader = isLeader
                     });
                 }
                 else
                 {
                     // Если запись есть, просто обновляем роль на руководитель, если статус руководителя
-                    if (u.IsLeader && existingStudioUser.StudioRole != "руководитель")
-                        existingStudioUser.StudioRole = "руководитель";
+                    if (u.IsLeader && !existingStudioUser.IsLeader)
+                        existingStudioUser.IsLeader = true;
                 }
             }
             await context.SaveChangesAsync();

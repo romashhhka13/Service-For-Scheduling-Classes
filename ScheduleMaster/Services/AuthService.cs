@@ -23,11 +23,11 @@ namespace ScheduleMaster.Services
         public async Task<RegisterResponseDTO> RegisterAsync(RegisterRequestDTO registerDTO)
         {
 
-            UserValidator.ValidateRegisterDTO(registerDTO);
+            AuthValidator.ValidateRegisterDTO(registerDTO);
 
             var userExists = await _context.Users.AnyAsync(user => user.Email == registerDTO.Email);
             if (userExists)
-                throw new Exception($"Пользователь с email {registerDTO.Email} уже существует!");
+                throw new BadRequestExceptions($"Пользователь с email {registerDTO.Email} уже существует!");
 
             var hashedPassword = PasswordHasher.Generate(registerDTO.Password);
 
@@ -63,7 +63,7 @@ namespace ScheduleMaster.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDTO.Email);
             if (user == null || !PasswordHasher.Verify(loginDTO.Password, user.PasswordHash))
-                throw new Exception("Неверный email или пароль");
+                throw new UnauthorizedExceptions("Неверный email или пароль");
 
             var token = _jwtProvider.GenerateToken(user);
 

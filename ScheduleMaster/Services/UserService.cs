@@ -4,180 +4,209 @@ using ScheduleMaster.Data;
 using ScheduleMaster.DTOs;
 using ScheduleMaster.Models;
 using ScheduleMaster.Helpers;
+using System.Security.Claims;
 
 namespace ScheduleMaster.Services
 {
     public class UserService
     {
-        // private readonly ScheduleMasterDbContext _context;
+        private readonly ScheduleMasterDbContext _context;
 
-        // public UserService(ScheduleMasterDbContext context)
-        // {
-        //     _context = context;
-        // }
+        public UserService(ScheduleMasterDbContext context)
+        {
+            _context = context;
+        }
 
-        // public async Task<List<UserDTO>> GetAllUsersAsync()
-        // {
-        //     return await _context.Users.Select(
-        //         user => new UserDTO
-        //         {
-        //             Id = user.Id,
-        //             Surname = user.Surname,
-        //             Name = user.Name,
-        //             MiddleName = user.MiddleName,
-        //             Email = user.Email,
-        //             Role = user.Role,
-        //             Faculty = user.Faculty,
-        //             GroupName = user.GroupName,
-        //             Course = user.Course
-        //         }).ToListAsync();
-        // }
+        private async Task<bool> IsUserStudioLeaderAsync(Guid leaderUserId, Guid studentUserId)
+        {
+            var studioIdsOfStudent = await _context.StudiosUsers
+                .Where(su => su.StudentId == studentUserId)
+                .Select(su => su.StudioId)
+                .ToListAsync();
 
-        // public async Task<UserDTO?> GetUserByIdAsync(Guid id)
-        // {
-        //     var user = await _context.Users.FindAsync(id);
-        //     if (user == null) return null;
+            var studiosLeadedByUser = await _context.StudiosUsers
+                .Where(su => su.StudentId == leaderUserId && su.IsLeader)
+                .Select(su => su.StudioId)
+                .ToListAsync();
 
-        //     return new UserDTO
-        //     {
-        //         Id = user.Id,
-        //         Surname = user.Surname,
-        //         Name = user.Name,
-        //         MiddleName = user.MiddleName,
-        //         Email = user.Email,
-        //         Role = user.Role,
-        //         Faculty = user.Faculty,
-        //         GroupName = user.GroupName,
-        //         Course = user.Course
-        //     };
-        // }
+            return studioIdsOfStudent.Intersect(studiosLeadedByUser).Any(); ;
+        }
 
-        // public async Task<UserDTO> CreateUserAsync(CreateUserDTO createDTO)
-        // {
-        //     // Проверка email
-        //     var userExist = await _context.Users.AnyAsync(user => user.Email == createDTO.Email);
-        //     if (userExist)
-        //         throw new Exception($"Пользователь с email '{createDTO.Email}' уже существует");
+        public async Task<UserResponseDTO?> GetUserByIdAsync(Guid userId, ClaimsPrincipal currentUser)
+        {
 
-        //     var hashedPassword = PasswordHasher.Generate(createDTO.Password);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                throw new NotFoundException("Пользователь не найден");
 
-        //     var user = new User
-        //     {
-        //         Id = Guid.NewGuid(),
-        //         Surname = createDTO.Surname,
-        //         Name = createDTO.Name,
-        //         MiddleName = createDTO.MiddleName,
-        //         Email = createDTO.Email,
-        //         PasswordHash = hashedPassword,
-        //         Role = createDTO.Role,
-        //         Faculty = createDTO.Faculty,
-        //         GroupName = createDTO.GroupName,
-        //         Course = createDTO.Course
-        //     };
+            var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
+            var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
+            if (currentUserRole == "admin" || currentUserId == userId)
+            {
+                return new UserResponseDTO
+                {
+                    Id = user.Id,
+                    Surname = user.Surname,
+                    Name = user.Name,
+                    MiddleName = user.MiddleName,
+                    Email = user.Email,
+                    Role = user.Role,
+                    Faculty = user.Faculty,
+                    GroupName = user.GroupName,
+                };
+            }
 
-        //     _context.Users.Add(user);
-        //     await _context.SaveChangesAsync();
+            bool isLeader = await IsUserStudioLeaderAsync(currentUserId, userId);
+            if (!isLeader)
+                throw new ForbiddenException("Нельзя получить другого пользователя");
 
-        //     return new UserDTO
-        //     {
-        //         Id = user.Id,
-        //         Surname = user.Surname,
-        //         Name = user.Name,
-        //         MiddleName = user.MiddleName,
-        //         Email = user.Email,
-        //         Role = user.Role,
-        //         Faculty = user.Faculty,
-        //         GroupName = user.GroupName,
-        //         Course = user.Course
-        //     };
-        // }
+            return new UserResponseDTO
+            {
+                Id = user.Id,
+                Surname = user.Surname,
+                Name = user.Name,
+                MiddleName = user.MiddleName,
+                Email = user.Email,
+                Role = user.Role,
+                Faculty = user.Faculty,
+                GroupName = user.GroupName,
+            };
+        }
 
-        // public async Task<UserDTO?> UpdateUserAsync(Guid id, UpdateUserDTO updateDTO)
-        // {
-        //     var user = await _context.Users.FindAsync(id);
-        //     if (user == null) return null;
+        public async Task<List<UserResponseDTO>> GetStudioUsersAsync(Guid studioId, ClaimsPrincipal currentUser)
+        {
+            var studio = await _context.Studios.FirstOrDefaultAsync(s => s.Id == studioId);
+            if (studio == null)
+                throw new NotFoundException("Студия не найдена");
 
-        //     if (!string.IsNullOrEmpty(updateDTO.Surname))
-        //         user.Surname = updateDTO.Surname;
+            var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
+            bool isLeader = await _context.StudiosUsers
+                .AnyAsync(su => su.StudentId == currentUserId && su.StudioId == studioId && su.IsLeader);
 
-        //     if (!string.IsNullOrEmpty(updateDTO.Name))
-        //         user.Name = updateDTO.Name;
+            if (!isLeader)
+                throw new ForbiddenException("Нет прав для просмотра студентов студии");
 
-        //     if (!string.IsNullOrEmpty(updateDTO.MiddleName))
-        //         user.MiddleName = updateDTO.MiddleName;
+            var studentIds = await _context.StudiosUsers
+                .Where(su => su.StudioId == studioId && !su.IsLeader)
+                .Select(su => su.StudentId)
+                .ToListAsync();
 
-        //     if (!string.IsNullOrEmpty(updateDTO.Email))
-        //         user.Email = updateDTO.Email;
+            var students = await _context.Users
+                .Where(u => studentIds.Contains(u.Id))
+                .ToListAsync();
 
-        //     if (!string.IsNullOrEmpty(updateDTO.Role))
-        //         user.Role = updateDTO.Role;
+            var userDtos = students.Select(u => new UserResponseDTO
+            {
+                Id = u.Id,
+                Surname = u.Surname,
+                Name = u.Name,
+                MiddleName = u.MiddleName,
+                Email = u.Email,
+                Role = u.Role,
+                Faculty = u.Faculty,
+                GroupName = u.GroupName
+            }).ToList();
 
-        //     if (!string.IsNullOrEmpty(updateDTO.Faculty))
-        //         user.Faculty = updateDTO.Faculty;
+            return userDtos;
+        }
 
-        //     if (!string.IsNullOrEmpty(updateDTO.GroupName))
-        //         user.GroupName = updateDTO.GroupName;
+        public async Task<List<UserResponseDTO>> GetGroupUsersAsync(Guid groupId, ClaimsPrincipal currentUser)
+        {
 
-        //     if (updateDTO.Course.HasValue)
-        //         user.Course = updateDTO.Course;
+            var group = await _context.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
+            if (group == null)
+                throw new NotFoundException("Группа не найдена");
 
-        //     await _context.SaveChangesAsync();
+            var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
+            var leaderStudioIds = await _context.StudiosUsers
+                .Where(su => su.StudentId == currentUserId && su.IsLeader)
+                .Select(su => su.StudioId)
+                .ToListAsync();
 
-        //     return new UserDTO
-        //     {
-        //         Id = user.Id,
-        //         Surname = user.Surname,
-        //         Name = user.Name,
-        //         MiddleName = user.MiddleName,
-        //         Email = user.Email,
-        //         Role = user.Role,
-        //         Faculty = user.Faculty,
-        //         GroupName = user.GroupName,
-        //         Course = user.Course
-        //     };
-        // }
+            var groupStudioId = await _context.Groups
+                .Where(g => g.Id == groupId)
+                .Select(g => g.StudioId)
+                .FirstOrDefaultAsync();
 
-        // // public async Task<bool> UpdatePasswordAsync(Guid id, UpdatePasswordDTO updatePasswordDTO)
-        // // {
+            var isLeaderOfGroup = leaderStudioIds.Contains(groupStudioId);
+            if (!isLeaderOfGroup)
+                throw new ForbiddenException("Нет прав для просмотра группы");
 
-        // // }
+            var studentIds = await _context.GroupsUsers
+                .Where(gu => gu.GroupId == groupId)
+                .Select(gu => gu.StudentId)
+                .ToListAsync();
 
-        // public async Task<bool> DeleteUserAsync(Guid id)
-        // {
-        //     var user = await _context.Users.FindAsync(id);
-        //     if (user == null) return false;
+            var students = await _context.Users
+                .Where(u => studentIds.Contains(u.Id))
+                .ToListAsync();
 
-        //     _context.Users.Remove(user);
-        //     await _context.SaveChangesAsync();
-        //     return true;
-        // }
+            var userDtos = students.Select(u => new UserResponseDTO
+            {
+                Id = u.Id,
+                Surname = u.Surname,
+                Name = u.Name,
+                MiddleName = u.MiddleName,
+                Email = u.Email,
+                Role = u.Role,
+                Faculty = u.Faculty,
+                GroupName = u.GroupName
+            }).ToList();
 
-        // // UserService.cs
-        // public async Task<List<StudentScheduleDTO>> GetStudentScheduleAsync(Guid studentId)
-        // {
-        //     var userExist = await _context.Users.AnyAsync(user => user.Id == studentId);
-        //     if (!userExist)
-        //         throw new Exception($"Пользователя не существует");
-
-        //     return await (from gm in _context.GroupMemberships
-        //                   join g in _context.Groups on gm.GroupId equals g.Id
-        //                   join schedule in _context.Schedules on g.Id equals schedule.GroupId
-        //                   join studio in _context.Studios on schedule.StudioId equals studio.Id
-        //                   where gm.StudentId == studentId
-        //                   select new StudentScheduleDTO
-        //                   {
-        //                       ScheduleId = schedule.Id,
-        //                       StudioName = studio.Name,
-        //                       GroupName = g.Name,
-        //                       StartDateTime = schedule.StartDateTime,
-        //                       EndDateTime = schedule.EndDateTime,
-        //                       Location = schedule.Location,
-        //                       WeekType = schedule.WeekType
-        //                   })
-        //                   .OrderBy(s => s.StartDateTime)
-        //                   .ToListAsync();
-        // }
+            return userDtos;
+        }
 
 
+        public async Task<UserResponseDTO> UpdateUserAsync(Guid userId, UpdateUserRequestDTO dto, ClaimsPrincipal currentUser)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                throw new NotFoundException("Пользователь не найден");
+
+            var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
+            if (currentUserId != userId)
+                throw new ForbiddenException("Обновлять профиль может только владелец или админ");
+
+            if (!string.IsNullOrWhiteSpace(dto.Surname))
+                user.Surname = dto.Surname;
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+                user.Name = dto.Name;
+            if (!string.IsNullOrWhiteSpace(dto.MiddleName))
+                user.MiddleName = dto.MiddleName;
+            if (!string.IsNullOrWhiteSpace(dto.Email))
+                user.Email = dto.Email;
+            if (!string.IsNullOrWhiteSpace(dto.Faculty))
+                user.Faculty = dto.Faculty;
+            if (!string.IsNullOrWhiteSpace(dto.GroupName))
+                user.GroupName = dto.GroupName;
+
+            await _context.SaveChangesAsync();
+
+            return new UserResponseDTO
+            {
+                Id = user.Id,
+                Surname = user.Surname,
+                Name = user.Name,
+                MiddleName = user.MiddleName,
+                Email = user.Email,
+                Role = user.Role,
+                Faculty = user.Faculty,
+                GroupName = user.GroupName,
+            };
+        }
+
+        public async Task DeleteUserAsync(Guid userId, Guid currentUserId)
+        {
+
+            if (userId != currentUserId)
+                throw new ForbiddenException("Нельзя удалить другого пользователя");
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                throw new NotFoundException("Пользователь не найден");
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+        }
     }
 }
