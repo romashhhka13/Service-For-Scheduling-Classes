@@ -1,4 +1,4 @@
-# Пользовательские файлы
+# Пользовательские файлы Visual Studio
 *.suo
 *.user
 *.userosscache
@@ -7,11 +7,13 @@
 # Папка настроек Visual Studio
 .vs/
 
-# Сборки
+# Сборки .NET
 [Bb]in/
 [Oo]bj/
+**/bin/
+**/obj/
 
-# Конфигурации
+# Конфигурации .NET
 appsettings.Development.json
 appsettings.Local.json
 launchSettings.json
@@ -22,23 +24,36 @@ launchSettings.json
 
 # Пакеты NuGet
 **/packages/*
+**/packages/repositories.config
 *.nupkg
 *.snupkg
+!**/*.nupkg
+!**/*.snupkg
 
-# IDE Rider/VS Code
+# Angular/Node.js
+/dist
+/out-tsc
+/tmp
+.angular/
+node_modules/
+
+# IDE
 .idea/
 .vscode/
-
-# Системные артефакты
 *.swp
 *.*~
-project.lock.json
-.DS_Store
 
-# Отчёты, логи
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# Логи и отчёты
 *.log
 logs/
 
-
+# Специфичные папки проекта
 ER/
 Instruction/
+
+# Coverage и testing
+/coverage

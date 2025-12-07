@@ -1,0 +1,8 @@
+.footer {
+    font-size: 12px;
+    padding: 0 20px;
+}
+
+.footer-spacer {
+    flex: 1 1 auto;
+}
