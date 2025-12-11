@@ -25,6 +25,18 @@ builder.Services.AddApiAuthentication(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials()
+              .SetIsOriginAllowed(_ => true);
+    });
+});
+
 var app = builder.Build();
 
 
@@ -57,6 +69,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
     Secure = CookieSecurePolicy.Always
 });
 
+app.UseCors("AllowAngular");
 app.UseAuthentication();
 app.UseAuthorization();
 

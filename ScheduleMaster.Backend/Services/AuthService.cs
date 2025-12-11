@@ -47,6 +47,8 @@ namespace ScheduleMaster.Services
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            var token = _jwtProvider.GenerateToken(user);
+
             return new RegisterResponseDTO
             {
                 Email = user.Email,
@@ -55,7 +57,8 @@ namespace ScheduleMaster.Services
                 MiddleName = user.MiddleName,
                 Role = user.Role,
                 Faculty = user.Faculty,
-                GroupName = user.GroupName
+                GroupName = user.GroupName,
+                Token = token
             };
         }
 

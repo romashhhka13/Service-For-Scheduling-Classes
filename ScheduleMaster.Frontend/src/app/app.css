@@ -1,4 +1,4 @@
-main {
-    padding: 20px;
+.content-outlet {
+    /* padding: 5px 20px; */
     flex: 1 0 auto;
 }

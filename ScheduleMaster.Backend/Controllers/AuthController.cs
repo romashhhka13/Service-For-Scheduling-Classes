@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using ScheduleMaster.Services;
 using ScheduleMaster.DTOs;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ namespace ScheduleMaster.Controllers
             try
             {
                 var response = await _authService.RegisterAsync(registerDTO);
+                Response.Cookies.Append("auth_token", response.Token);
                 return Ok(response);
             }
             catch (BadRequestExceptions ex)
@@ -31,7 +33,7 @@ namespace ScheduleMaster.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(new { message = ex.Message, stack = ex.StackTrace });
             }
         }
 
@@ -42,7 +44,7 @@ namespace ScheduleMaster.Controllers
             try
             {
                 var response = await _authService.LoginAsync(loginDTO);
-                Response.Cookies.Append("cookie", response.Token);
+                Response.Cookies.Append("auth_token", response.Token);
                 return Ok(response);
             }
             catch (UnauthorizedExceptions ex)
@@ -53,6 +55,20 @@ namespace ScheduleMaster.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        [HttpGet("check")]
+        [Authorize]
+        public IActionResult CheckAuth()
+        {
+            return Ok(new { message = "Авторизован" });
+        }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Append("auth_token", "");
+            return Ok(new { message = "Logged out" });
         }
     }
 }

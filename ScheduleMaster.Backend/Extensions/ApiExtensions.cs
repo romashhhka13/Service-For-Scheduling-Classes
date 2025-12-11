@@ -35,7 +35,7 @@ namespace ScheduleMaster.Extensions
             {
                 OnMessageReceived = context =>
                 {
-                    context.Token = context.Request.Cookies["cookie"];
+                    context.Token = context.Request.Cookies["auth_token"];
                     return Task.CompletedTask;
                 }
             };

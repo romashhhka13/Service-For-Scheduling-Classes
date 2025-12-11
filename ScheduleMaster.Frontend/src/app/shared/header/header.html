@@ -17,11 +17,11 @@
     <span class="spacer"></span>
 
     <!-- Основное меню -->
-    <nav class="nav">
+    <nav *ngIf="showMenu()" class="nav">
         <button mat-button>Расписание</button>
         <button mat-button>Студии</button>
-        <button mat-button>Группы</button>
-        <button mat-button>Пользователи</button>
+        <!-- <button mat-button>Группы</button> -->
+        <!-- <button mat-button>Пользователи</button> -->
 
         <!-- Выпадающее меню -->
         <button mat-button [matMenuTriggerFor]="moreMenu">
@@ -30,7 +30,9 @@
         <mat-menu #moreMenu="matMenu">
             <button mat-menu-item>Настройки</button>
             <button mat-menu-item>О системе</button>
-            <button mat-menu-item>Выход</button>
+            <button mat-menu-item (click)="onLogout()">
+                Выход
+            </button>
         </mat-menu>
     </nav>
 </mat-toolbar>
