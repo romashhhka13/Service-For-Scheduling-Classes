@@ -18,13 +18,13 @@ namespace ScheduleMaster.Controllers
         }
 
         // GET: api/user/{id}
-        [HttpGet("{id}")]
-        [Authorize(Roles = "admin, user")]
-        public async Task<IActionResult> GetUserById([FromRoute] Guid id)
+        [HttpGet()]
+        [Authorize(Roles = "user")]
+        public async Task<IActionResult> GetUserById()
         {
             try
             {
-                var user = await _userService.GetUserByIdAsync(id, User);
+                var user = await _userService.GetUserByIdAsync(User);
                 return Ok(user);
             }
             catch (ForbiddenException ex)
@@ -41,61 +41,16 @@ namespace ScheduleMaster.Controllers
             }
         }
 
-        [HttpGet("studio/{studioId}")]
-        [Authorize(Roles = "user")]
-        public async Task<IActionResult> GetStudioUsers([FromRoute] Guid studioId)
-        {
-            try
-            {
-                var users = await _userService.GetStudioUsersAsync(studioId, User);
-                return Ok(users);
-            }
-            catch (ForbiddenException ex)
-            {
-                return StatusCode(403, new { message = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = "Ошибка получения" });
-            }
-        }
-
-        [HttpGet("group/{groupId}")]
-        [Authorize(Roles = "user")]
-        public async Task<IActionResult> GetGroupUsers([FromRoute] Guid groupId)
-        {
-            try
-            {
-                var users = await _userService.GetGroupUsersAsync(groupId, User);
-                return Ok(users);
-            }
-            catch (ForbiddenException ex)
-            {
-                return StatusCode(403, new { message = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = "Ошибка получения" });
-            }
-        }
 
 
         // PUT: api/user/{id}
-        [HttpPut("{id}")]
+        [HttpPut()]
         [Authorize(Roles = "user")]
-        public async Task<IActionResult> UpdateUserById([FromRoute] Guid id, [FromBody] UpdateUserRequestDTO dto)
+        public async Task<IActionResult> UpdateUserById([FromBody] UpdateUserRequestDTO dto)
         {
             try
             {
-                var user = await _userService.UpdateUserAsync(id, dto, User);
+                var user = await _userService.UpdateUserAsync(dto, User);
                 return Ok(user);
             }
             catch (ForbiddenException ex)
@@ -114,14 +69,13 @@ namespace ScheduleMaster.Controllers
 
 
         // DELETE: api/user/{id}
-        [HttpDelete("{id}")]
+        [HttpDelete()]
         [Authorize(Roles = "user")]
-        public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
+        public async Task<IActionResult> DeleteUser()
         {
             try
             {
-                var currentUserId = User.FindFirst("userId")?.Value;
-                await _userService.DeleteUserAsync(id, new Guid(currentUserId!));
+                await _userService.DeleteUserAsync(User);
                 return NoContent();
             }
             catch (ForbiddenException ex)
@@ -137,6 +91,52 @@ namespace ScheduleMaster.Controllers
                 return BadRequest();
             }
 
+        }
+
+        [HttpGet("studios_as_member")]
+        [Authorize(Roles = "user")]
+        public async Task<IActionResult> GetStudiosAsMember()
+        {
+            try
+            {
+                var studios = await _userService.GetStudiosAsMemberAsync(User);
+                return Ok(studios);
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("studios_as_leader")]
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> GetStudiosAsLeader()
+        {
+            try
+            {
+                var studios = await _userService.GetStudiosAsLeaderAsync(User);
+                return Ok(studios);
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
         }
     }
 }

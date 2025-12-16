@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>Создать новую студию</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="createForm" class="dialog-form">
+        <!-- Название -->
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Название студии *</mat-label>
+            <input matInput formControlName="title" placeholder="Например: Frontend Club" autofocus>
+            <mat-error *ngIf="createForm.get('title')?.hasError('required')">
+                Название обязательно
+            </mat-error>
+            <mat-error *ngIf="createForm.get('title')?.hasError('minlength')">
+                Минимум 2 символа
+            </mat-error>
+            <mat-error *ngIf="createForm.get('title')?.hasError('maxlength')">
+                Максимум 100 символов
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Категория -->
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Категория (опционально)</mat-label>
+            <mat-select formControlName="categoryId">
+                <mat-option [value]="null">Без категории</mat-option>
+                <mat-option *ngFor="let cat of categories" [value]="cat.id">
+                    {{ cat.category }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button (click)="onCancel()">
+        Отмена
+    </button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="createForm.invalid">
+        Создать
+    </button>
+</mat-dialog-actions>

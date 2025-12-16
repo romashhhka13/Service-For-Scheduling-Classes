@@ -18,10 +18,9 @@ namespace ScheduleMaster.Controllers
         }
 
         // GET: api/event
-        [HttpGet("user/{userId}")]
+        [HttpGet()]
         [Authorize(Roles = "admin, user")]
-        public async Task<IActionResult> GetUserEvents([FromRoute] Guid userId,
-         [FromQuery] DateTime? startDate = null,
+        public async Task<IActionResult> GetUserEvents([FromQuery] DateTime? startDate = null,
          [FromQuery] DateTime? endDate = null)
         {
             try
@@ -33,7 +32,7 @@ namespace ScheduleMaster.Controllers
                 var actualEnd = endDate.HasValue
                     ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc)
                     : DateTime.SpecifyKind(DateTime.UtcNow.Date.AddDays(1), DateTimeKind.Utc);
-                var events = await _eventService.GetUserEventsAsync(userId, actualStart, actualEnd, Guid.Parse(User.FindFirst("userId")?.Value!));
+                var events = await _eventService.GetUserEventsAsync(actualStart, actualEnd, User);
                 return Ok(events);
             }
             catch (ForbiddenException ex)
@@ -73,62 +72,6 @@ namespace ScheduleMaster.Controllers
             }
         }
 
-        // POST: api/event/group/{group_id}
-        [HttpPost("group/{groupId}")]
-        [Authorize(Roles = "admin, user")]
-        public async Task<IActionResult> CreateEventForGroup([FromRoute] Guid groupId, [FromBody] CreateEventRequestDTO createDTO)
-        {
-            try
-            {
-                var eventId = await _eventService.CreateEventForGroupAsync(groupId, createDTO, User);
-                return Ok(eventId);
-            }
-            catch (ForbiddenException ex)
-            {
-                return StatusCode(403, new { message = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (BadRequestExceptions ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest();
-            }
-
-        }
-
-        // POST: api/event/studio/{studio_id}
-        [HttpPost("studio/{studioId}")]
-        [Authorize(Roles = "admin, user")]
-        public async Task<IActionResult> CreateEventForStudio([FromRoute] Guid studioId, [FromBody] CreateEventRequestDTO createDTO)
-        {
-            try
-            {
-                var eventId = await _eventService.CreateEventForStudioAsync(studioId, createDTO, User);
-                return Ok(eventId);
-            }
-            catch (ForbiddenException ex)
-            {
-                return StatusCode(403, new { message = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (BadRequestExceptions ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest();
-            }
-        }
 
         // PUT: api/event/{id}
         [HttpPut("{id}")]

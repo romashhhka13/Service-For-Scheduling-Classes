@@ -1,0 +1,174 @@
+<div class="studio-detail-wrapper" *ngIf="!loading(); else loadingTpl">
+    <!-- HEADER -->
+    <div class="studio-header">
+        <div class="header-back">
+            <button mat-icon-button [routerLink]="['/studio']" matTooltip="К списку студий">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+        </div>
+
+        <div class="header-content">
+            <h1>{{ studio()?.title }}</h1>
+            <div class="header-meta">
+                <span class="meta-item" [ngClass]="isLeader() ? 'leader' : 'member'">
+                    <mat-icon>{{ isLeader() ? 'admin_panel_settings' : 'person' }}</mat-icon>
+                    {{ isLeader() ? 'Вы руководитель' : 'Вы участник' }}
+                </span>
+                <span class="meta-item">
+                    <mat-icon>group</mat-icon>
+                    {{ studio()?.memberCount }} участников
+                </span>
+
+                <span class="meta-item" *ngIf="studio()?.categoryId">
+                    <mat-icon>category</mat-icon>
+                    {{ getCategoryName(studio()?.categoryId!) }}
+                </span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="openEditDialog()" [disabled]="!isLeader()"
+                matTooltip="Редактировать студию (только для руководителя)">
+                <mat-icon>edit</mat-icon>
+                Редактировать
+            </button>
+        </div>
+    </div>
+
+    <!-- ФИЛЬТРЫ -->
+    <mat-card class="filters-card">
+        <div class="filters-grid">
+            <!-- Поиск слева на полкарты -->
+            <mat-form-field appearance="outline" class="filter-field filter-search">
+                <mat-label>Поиск по имени, факультету, группе</mat-label>
+                <input matInput [value]="searchQuery()" (input)="searchQuery.set($event.target.value)"
+                    placeholder="Напиши фамилию, факультет или группу">
+                <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+
+            <!-- Справа роль -->
+            <div class="filter-right">
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Роль</mat-label>
+                    <mat-select [value]="roleFilter()" (selectionChange)="roleFilter.set($event.value)">
+                        <mat-option value="all">Все</mat-option>
+                        <mat-option value="leader">Руководители</mat-option>
+                        <mat-option value="member">Участники</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Факультет</mat-label>
+                    <mat-select [value]="facultyFilter()" (selectionChange)="facultyFilter.set($event.value)">
+                        <mat-option value="">Все</mat-option>
+                        <mat-option *ngFor="let fac of faculties()" [value]="fac">
+                            {{ fac }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+        </div>
+    </mat-card>
+
+
+    <!-- ПЕРЕКЛЮЧЕНИЕ РЕЖИМА -->
+    <div class="view-mode-switch">
+        <button mat-icon-button [color]="viewMode() === 'cards' ? 'primary' : ''" (click)="viewMode.set('cards')"
+            matTooltip="Карточки">
+            <mat-icon>dashboard</mat-icon>
+        </button>
+        <button mat-icon-button [color]="viewMode() === 'table' ? 'primary' : ''" (click)="viewMode.set('table')"
+            matTooltip="Таблица">
+            <mat-icon>list</mat-icon>
+        </button>
+        <span class="result-count">{{ filteredMembers().length }} результатов</span>
+    </div>
+
+    <!-- КАРТОЧКИ УЧАСТНИКОВ -->
+    <div class="members-grid" *ngIf="viewMode() === 'cards'">
+        <mat-card *ngFor="let member of filteredMembers()" class="member-card"
+            [ngClass]="member.isLeader ? 'leader' : 'member'">
+            <mat-card-header>
+                <div class="role-badge" [ngClass]="member.isLeader ? 'leader' : 'member'">
+                    <mat-icon>{{ member.isLeader ? 'admin_panel_settings' : 'person' }}</mat-icon>
+                </div>
+                <div class="member-info">
+                    <mat-card-title>{{ member.surname }} {{ member.name }}</mat-card-title>
+                    <mat-card-subtitle>
+                        {{ member.isLeader ? 'Руководитель студии' : 'Участник студии' }}
+                    </mat-card-subtitle>
+                </div>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div class="info-row">
+                    <span class="label">Факультет:</span>
+                    <span class="value">{{ member.faculty || '-' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Учебная группа:</span>
+                    <span class="value">{{ member.studyGroup || '-'}}</span>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- ТАБЛИЦА УЧАСТНИКОВ -->
+    <div class="table-container" *ngIf="viewMode() === 'table'">
+        <table mat-table [dataSource]="filteredMembers()" class="members-table">
+            <!-- Роль -->
+            <ng-container matColumnDef="role">
+                <th mat-header-cell *matHeaderCellDef>Роль</th>
+                <td mat-cell *matCellDef="let m">
+                    <span class="role-badge-small" [ngClass]="m.isLeader ? 'leader' : 'member'">
+                        {{ m.isLeader ? 'Р' : 'У' }}
+                    </span>
+                    <span class="role-text">
+                        {{ m.isLeader ? 'Руководитель' : 'Участник' }}
+                    </span>
+                </td>
+            </ng-container>
+
+            <!-- ФИО -->
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>ФИО</th>
+                <td mat-cell *matCellDef="let m">
+                    {{ m.surname }} {{ m.name }}
+                </td>
+            </ng-container>
+
+            <!-- Факультет -->
+            <ng-container matColumnDef="faculty">
+                <th mat-header-cell *matHeaderCellDef>Факультет</th>
+                <td mat-cell *matCellDef="let m">
+                    {{ m.faculty || '-'}}
+                </td>
+            </ng-container>
+
+            <!-- Учебная группа -->
+            <ng-container matColumnDef="group">
+                <th mat-header-cell *matHeaderCellDef>Учебная группа</th>
+                <td mat-cell *matCellDef="let m">
+                    {{ m.studyGroup || '-'}}
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['role','name','faculty','group']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['role','name','faculty','group'];"></tr>
+        </table>
+    </div>
+
+    <!-- ПУСТО -->
+    <div class="empty-state" *ngIf="filteredMembers().length === 0">
+        <mat-icon>group</mat-icon>
+        <h3>Нет участников</h3>
+        <p>Попробуй изменить фильтры</p>
+    </div>
+</div>
+
+<ng-template #loadingTpl>
+    <div class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Загрузка студии...</p>
+    </div>
+</ng-template>

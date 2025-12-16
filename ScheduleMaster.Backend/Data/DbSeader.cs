@@ -59,6 +59,22 @@ namespace ScheduleMaster.DbSeader
                 await context.SaveChangesAsync();
             }
 
+            var danceCategory = await context.StudiosCategories.FirstOrDefaultAsync(x => x.Category == "Танцы");
+            if (danceCategory == null)
+            {
+                danceCategory = new StudioCategory { Category = "Танцы" };
+                context.StudiosCategories.Add(danceCategory);
+                await context.SaveChangesAsync();
+            }
+
+            var instrumentCategory = await context.StudiosCategories.FirstOrDefaultAsync(x => x.Category == "Музыка");
+            if (instrumentCategory == null)
+            {
+                instrumentCategory = new StudioCategory { Category = "Музыка" };
+                context.StudiosCategories.Add(instrumentCategory);
+                await context.SaveChangesAsync();
+            }
+
             // Создаём студию
             var vocalStudio = await context.Studios
                 .FirstOrDefaultAsync(s => s.Title == "Вокальная студия \"Вдохновение\"" && s.StudioCategoryId == vocalCategory.Id);

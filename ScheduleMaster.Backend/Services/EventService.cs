@@ -16,122 +16,14 @@ namespace ScheduleMaster.Services
             _context = context;
         }
 
-        public async Task<Guid> CreateEventForGroupAsync(Guid groupId, CreateEventRequestDTO dto, ClaimsPrincipal currentUser)
+
+        public async Task<List<EventResponseDTO>> GetUserEventsAsync(DateTime startDate,
+         DateTime endDate, ClaimsPrincipal User)
         {
-            var group = await _context.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
-            if (group == null)
-                throw new NotFoundException("Группа не найдена");
-
-            var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
-            var role = currentUser.FindFirst(ClaimTypes.Role)?.Value;
-
-            var isLeader = await _context.GroupsUsers
-                .AnyAsync(gu => gu.StudentId == currentUserId && gu.GroupId == groupId);
-
-            if (role != "admin" && !isLeader)
-                throw new ForbiddenException("Только админ или руководитель группы");
-
-            if (dto.StartDateTime <= DateTime.UtcNow)
-                throw new BadRequestExceptions("Событие должно начинаться в будущем");
-
-            if (dto.EndDateTime <= dto.StartDateTime)
-                throw new BadRequestExceptions("Дата окончания должна быть позже даты начала");
-
-            var ev = new Event
-            {
-                Id = Guid.NewGuid(),
-                Title = dto.Title,
-                StartDateTime = dto.StartDateTime,
-                EndDateTime = dto.EndDateTime,
-                Location = dto.Location
-            };
-
-            await _context.Events.AddAsync(ev);
-            await _context.EventsGroups.AddAsync(new EventGroup
-            {
-                EventId = ev.Id,
-                GroupId = groupId
-            });
-
-            var studioId = await _context.Groups
-                .Where(g => g.Id == groupId)
-                .Select(g => g.StudioId)
-                .FirstOrDefaultAsync();
-            await _context.EventsStudios.AddAsync(new EventStudio
-            {
-                EventId = ev.Id,
-                StudioId = studioId
-            });
-
-            await _context.SaveChangesAsync();
-
-            return ev.Id;
-        }
-
-        public async Task<Guid> CreateEventForStudioAsync(Guid studioId, CreateEventRequestDTO dto, ClaimsPrincipal currentUser)
-        {
-            var studio = await _context.Studios.FirstOrDefaultAsync(s => s.Id == studioId);
-            if (studio == null)
-                throw new NotFoundException("Студия не найдена");
-
-            var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
-            var role = currentUser.FindFirst(ClaimTypes.Role)?.Value;
-
-            var isLeader = await _context.StudiosUsers
-                .AnyAsync(su => su.StudentId == currentUserId && su.StudioId == studioId && su.IsLeader);
-
-            if (role != "admin" && !isLeader)
-                throw new ForbiddenException("Только руководитель данной студии может создавать события для неё");
-
-            if (dto.StartDateTime <= DateTime.UtcNow)
-                throw new BadRequestExceptions("Событие должно начинаться в будущем");
-
-            if (dto.EndDateTime <= dto.StartDateTime)
-                throw new BadRequestExceptions("Дата окончания должна быть позже даты начала");
-
-            var ev = new Event
-            {
-                Id = Guid.NewGuid(),
-                Title = dto.Title,
-                StartDateTime = dto.StartDateTime,
-                EndDateTime = dto.EndDateTime,
-                Location = dto.Location
-            };
-
-            await _context.Events.AddAsync(ev);
-            await _context.EventsStudios.AddAsync(new EventStudio
-            {
-                EventId = ev.Id,
-                StudioId = studioId
-            });
-
-            // var groupIds = await _context.Groups
-            //     .Where(g => g.StudioId == studioId)
-            //     .Select(g => g.Id)
-            //     .ToListAsync();
-            // foreach (var groupId in groupIds)
-            // {
-            //     await _context.EventsGroups.AddAsync(new EventGroup
-            //     {
-            //         EventId = ev.Id,
-            //         GroupId = groupId
-            //     });
-            // }
-
-            await _context.SaveChangesAsync();
-
-            return ev.Id;
-        }
-
-        public async Task<List<EventResponseDTO>> GetUserEventsAsync(Guid userId, DateTime startDate,
-         DateTime endDate, Guid currentUserId)
-        {
+            Guid userId = Guid.Parse(User.FindFirst("userId")?.Value!);
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
                 throw new NotFoundException("Пользователь не найден");
-
-            if (userId != currentUserId)
-                throw new ForbiddenException("");
 
             var groupIds = await _context.GroupsUsers
                 .Where(gu => gu.StudentId == userId)

@@ -70,5 +70,56 @@ namespace ScheduleMaster.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpGet("{groupId}/users")]
+        [Authorize(Roles = "user")]
+        public async Task<IActionResult> GetGroupUsers([FromRoute] Guid groupId)
+        {
+            try
+            {
+                var users = await _groupService.GetGroupUsersAsync(groupId, User);
+                return Ok(users);
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Ошибка получения" });
+            }
+        }
+
+        [HttpPost("{groupId}/event")]
+        [Authorize(Roles = "admin, user")]
+        public async Task<IActionResult> CreateEventForGroup([FromRoute] Guid groupId, [FromBody] CreateEventRequestDTO createDTO)
+        {
+            try
+            {
+                var eventId = await _groupService.CreateEventForGroupAsync(groupId, createDTO, User);
+                return Ok(eventId);
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (BadRequestExceptions ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+
+        }
     }
 }

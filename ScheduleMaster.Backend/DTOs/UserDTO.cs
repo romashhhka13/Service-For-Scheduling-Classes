@@ -8,8 +8,9 @@ namespace ScheduleMaster.DTOs
         public string? MiddleName { get; set; }
         public required string Email { get; set; }
         public required string Role { get; set; }
-        public string? Faculty { get; set; }
-        public string? GroupName { get; set; }
+        public required string Faculty { get; set; }
+        public required string studyGroup { get; set; }
+        public bool isLeader { get; set; }
     }
 
     public class UpdateUserRequestDTO

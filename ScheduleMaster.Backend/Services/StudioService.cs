@@ -72,60 +72,142 @@ namespace ScheduleMaster.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<StudioResponseDTO>> GetStudiosAsMemberAsync(Guid userId, ClaimsPrincipal currentUser)
+        public async Task<StudioResponseDTO> GetStudiosByIdAsync(Guid studioId, ClaimsPrincipal currentUser)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
-                throw new NotFoundException("Пользователь не найден");
 
+            var studio = await _context.Studios.FirstOrDefaultAsync(s => s.Id == studioId);
             var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
+            if (studio == null)
+                throw new NotFoundException("Студия не найдена");
 
-            if (currentUserId != userId)
-                throw new ForbiddenException("Можно просматривать только свои студии-участия");
+            var currentUserIsLeader = await _context.StudiosUsers
+                .AnyAsync(su => su.StudentId == currentUserId &&
+                                su.StudioId == studioId &&
+                                su.IsLeader);
 
-            var studioIds = await _context.StudiosUsers
-                .Where(su => su.StudentId == userId && !su.IsLeader)
-                .Select(su => su.StudioId)
-                .ToListAsync();
+            var memberCount = await _context.StudiosUsers
+                .CountAsync(su => su.StudioId == studio.Id);
 
-            var studios = await _context.Studios
-                .Where(s => studioIds.Contains(s.Id))
-                .ToListAsync();
-
-            return studios.Select(s => new StudioResponseDTO
+            return new StudioResponseDTO
             {
-                Id = s.Id,
-                Title = s.Title,
-                CategoryId = s.StudioCategoryId
+                Id = studio.Id,
+                Title = studio.Title,
+                CategoryId = studio.StudioCategoryId,
+                MemberCount = memberCount,
+                currentUserIsLeader = currentUserIsLeader
+            };
+        }
+
+
+        public async Task<List<GetCategoriesResponseDTO>> GetCategoriesAsync()
+        {
+            var categories = await _context.StudiosCategories
+                .Select(c => new { c.Id, c.Category })
+                .ToListAsync();
+
+            return categories.Select(c => new GetCategoriesResponseDTO
+            {
+                Id = c.Id,
+                Category = c.Category
             }).ToList();
         }
 
-        public async Task<List<StudioResponseDTO>> GetStudiosAsLeaderAsync(Guid userId, ClaimsPrincipal currentUser)
+        public async Task<Guid> CreateEventForStudioAsync(Guid studioId, CreateEventRequestDTO dto, ClaimsPrincipal currentUser)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
-                throw new NotFoundException("Пользователь не найден");
+            var studio = await _context.Studios.FirstOrDefaultAsync(s => s.Id == studioId);
+            if (studio == null)
+                throw new NotFoundException("Студия не найдена");
 
             var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
+            var role = currentUser.FindFirst(ClaimTypes.Role)?.Value;
 
-            if (currentUserId != userId)
-                throw new ForbiddenException("Можно просматривать только свои студии");
+            var isLeader = await _context.StudiosUsers
+                .AnyAsync(su => su.StudentId == currentUserId && su.StudioId == studioId && su.IsLeader);
 
-            var studioIds = await _context.StudiosUsers
-                .Where(su => su.StudentId == userId && su.IsLeader)
-                .Select(su => su.StudioId)
-                .ToListAsync();
+            if (role != "admin" && !isLeader)
+                throw new ForbiddenException("Только руководитель данной студии может создавать события для неё");
 
-            var studios = await _context.Studios
-                .Where(s => studioIds.Contains(s.Id))
-                .ToListAsync();
+            if (dto.StartDateTime <= DateTime.UtcNow)
+                throw new BadRequestExceptions("Событие должно начинаться в будущем");
 
-            return studios.Select(s => new StudioResponseDTO
+            if (dto.EndDateTime <= dto.StartDateTime)
+                throw new BadRequestExceptions("Дата окончания должна быть позже даты начала");
+
+            var ev = new Event
             {
-                Id = s.Id,
-                Title = s.Title,
-                CategoryId = s.StudioCategoryId
+                Id = Guid.NewGuid(),
+                Title = dto.Title,
+                StartDateTime = dto.StartDateTime,
+                EndDateTime = dto.EndDateTime,
+                Location = dto.Location
+            };
+
+            await _context.Events.AddAsync(ev);
+            await _context.EventsStudios.AddAsync(new EventStudio
+            {
+                EventId = ev.Id,
+                StudioId = studioId
+            });
+
+            // var groupIds = await _context.Groups
+            //     .Where(g => g.StudioId == studioId)
+            //     .Select(g => g.Id)
+            //     .ToListAsync();
+            // foreach (var groupId in groupIds)
+            // {
+            //     await _context.EventsGroups.AddAsync(new EventGroup
+            //     {
+            //         EventId = ev.Id,
+            //         GroupId = groupId
+            //     });
+            // }
+
+            await _context.SaveChangesAsync();
+
+            return ev.Id;
+        }
+
+
+        public async Task<List<UserResponseDTO>> GetStudioUsersAsync(Guid studioId, ClaimsPrincipal currentUser)
+        {
+            var studio = await _context.Studios.FirstOrDefaultAsync(s => s.Id == studioId);
+            if (studio == null)
+                throw new NotFoundException("Студия не найдена");
+
+            var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
+            bool isLeader = await _context.StudiosUsers
+                .AnyAsync(su => su.StudentId == currentUserId && su.StudioId == studioId && su.IsLeader);
+
+            var studioUsers = await _context.StudiosUsers
+                .Where(su => su.StudioId == studioId)
+                .ToListAsync();
+
+            var studentIds = studioUsers
+                .Select(su => su.StudentId)
+                .ToList();
+
+            var students = await _context.Users
+                .Where(u => studentIds.Contains(u.Id))
+                .ToListAsync();
+
+            var userDtos = students.Select(u =>
+            {
+                var suLink = studioUsers.First(su => su.StudentId == u.Id);
+                return new UserResponseDTO
+                {
+                    Id = u.Id,
+                    Surname = u.Surname,
+                    Name = u.Name,
+                    MiddleName = u.MiddleName,
+                    Email = u.Email,
+                    Role = u.Role,
+                    Faculty = u.Faculty,
+                    studyGroup = u.GroupName,
+                    isLeader = suLink.IsLeader   // ← индивидуальный флаг
+                };
             }).ToList();
+
+            return userDtos;
         }
     }
 }

@@ -18,6 +18,14 @@ namespace ScheduleMaster.DTOs
         public Guid Id { get; set; }
         public string Title { get; set; } = null!;
         public Guid? CategoryId { get; set; }
+        public int MemberCount { get; set; }
+        public bool currentUserIsLeader { get; set; }
+    }
+
+    public class GetCategoriesResponseDTO
+    {
+        public Guid Id { get; set; }
+        public required string Category { get; set; }
     }
 
 }
