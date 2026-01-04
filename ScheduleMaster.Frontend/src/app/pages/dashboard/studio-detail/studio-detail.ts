@@ -113,10 +113,10 @@ export class StudioDetail implements OnInit {
     });
 
 
-    studyGroups = computed(() => {
-        const sgs = new Set(this.members().map(m => m.studyGroup || ''));
-        return Array.from(sgs).filter(g => g !== '').sort();
-    });
+    // studyGroups = computed(() => {
+    //     const sgs = new Set(this.members().map(m => m.studyGroup || ''));
+    //     return Array.from(sgs).filter(g => g !== '').sort();
+    // });
 
 
     ngOnInit(): void {
@@ -155,7 +155,7 @@ export class StudioDetail implements OnInit {
                     this.cdr.markForCheck();
                 },
                 error: (err) => {
-                    console.error('❌ Ошибка загрузки студии:', err);
+                    console.error('Ошибка загрузки студии:', err);
                     this.snackBar.open('Ошибка загрузки студии', 'Закрыть', { duration: 3000 });
                     this.loading.set(false);
                     this.cdr.markForCheck();
@@ -190,11 +190,11 @@ export class StudioDetail implements OnInit {
             if (result) {
                 this.studioService.updateStudio(s.id, result).subscribe({
                     next: () => {
-                        this.snackBar.open('Студия обновлена ✅', 'Закрыть', { duration: 2000 });
+                        this.snackBar.open('Студия обновлена', 'Закрыть', { duration: 2000 });
                         this.studio.update(prev => prev ? { ...prev, ...result } : prev);
                     },
                     error: err => {
-                        console.error('❌ Ошибка обновления:', err);
+                        console.error('Ошибка обновления:', err);
                         this.snackBar.open('Ошибка обновления студии', 'Закрыть', { duration: 3000 });
                     }
                 });
