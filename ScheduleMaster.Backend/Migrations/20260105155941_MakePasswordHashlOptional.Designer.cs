@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleMaster.Data;
@@ -11,9 +12,11 @@ using ScheduleMaster.Data;
 namespace ScheduleMaster.Migrations
 {
     [DbContext(typeof(ScheduleMasterDbContext))]
-    partial class ScheduleMasterDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260105155941_MakePasswordHashlOptional")]
+    partial class MakePasswordHashlOptional
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,6 +62,21 @@ namespace ScheduleMaster.Migrations
                     b.HasIndex("GroupId");
 
                     b.ToTable("events_groups", (string)null);
+                });
+
+            modelBuilder.Entity("ScheduleMaster.Models.EventStudio", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StudioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("EventId", "StudioId");
+
+                    b.HasIndex("StudioId");
+
+                    b.ToTable("events_studios", (string)null);
                 });
 
             modelBuilder.Entity("ScheduleMaster.Models.Group", b =>
@@ -207,6 +225,21 @@ namespace ScheduleMaster.Migrations
                     b.HasOne("ScheduleMaster.Models.Group", null)
                         .WithMany()
                         .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ScheduleMaster.Models.EventStudio", b =>
+                {
+                    b.HasOne("ScheduleMaster.Models.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ScheduleMaster.Models.Studio", null)
+                        .WithMany()
+                        .HasForeignKey("StudioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

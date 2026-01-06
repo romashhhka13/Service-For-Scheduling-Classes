@@ -15,7 +15,6 @@ namespace ScheduleMaster.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupUser> GroupsUsers { get; set; }
         public DbSet<Event> Events { get; set; }
-        public DbSet<EventStudio> EventsStudios { get; set; }
         public DbSet<EventGroup> EventsGroups { get; set; }
         public DbSet<StudioCategory> StudiosCategories { get; set; }
 
@@ -30,6 +29,10 @@ namespace ScheduleMaster.Data
 
             modelBuilder.Entity<User>()
                 .HasIndex(user => user.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(user => user.ChatId)
                 .IsUnique();
 
             // studio_categories
@@ -91,23 +94,6 @@ namespace ScheduleMaster.Data
             // events
             modelBuilder.Entity<Event>().ToTable("events")
                 .HasKey(ev => ev.Id);
-
-
-            // events_studios
-            modelBuilder.Entity<EventStudio>().ToTable("events_studios")
-                .HasKey(events_studios => new { events_studios.EventId, events_studios.StudioId });
-
-            modelBuilder.Entity<EventStudio>()
-                .HasOne<Event>()
-                .WithMany()
-                .HasForeignKey(events_studios => events_studios.EventId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<EventStudio>()
-                .HasOne<Studio>()
-                .WithMany()
-                .HasForeignKey(events_studios => events_studios.StudioId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             // events_groups
             modelBuilder.Entity<EventGroup>().ToTable("events_groups")

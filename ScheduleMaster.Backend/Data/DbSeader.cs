@@ -280,7 +280,7 @@ namespace ScheduleMaster.DbSeader
                 context.Events.Add(concertEvent);
 
                 // Добавляем концерт для всех групп студии
-                context.EventsStudios.Add(new EventStudio { EventId = concertEvent.Id, StudioId = vocalStudio.Id });
+                // context.EventsStudios.Add(new EventStudio { EventId = concertEvent.Id, StudioId = vocalStudio.Id });
                 context.EventsGroups.Add(new EventGroup { EventId = concertEvent.Id, GroupId = groupMale.Id });
                 context.EventsGroups.Add(new EventGroup { EventId = concertEvent.Id, GroupId = groupFemale.Id });
                 context.EventsGroups.Add(new EventGroup { EventId = concertEvent.Id, GroupId = groupSenior.Id });
@@ -306,7 +306,7 @@ namespace ScheduleMaster.DbSeader
 
                 context.Events.Add(rehearsalEvent);
                 context.EventsGroups.Add(new EventGroup { EventId = rehearsalEvent.Id, GroupId = groupMale.Id });
-                context.EventsStudios.Add(new EventStudio { EventId = rehearsalEvent.Id, StudioId = vocalStudio.Id });
+                // context.EventsStudios.Add(new EventStudio { EventId = rehearsalEvent.Id, StudioId = vocalStudio.Id });
 
                 await context.SaveChangesAsync();
             }
@@ -326,7 +326,7 @@ namespace ScheduleMaster.DbSeader
                 };
                 context.Events.Add(meetingEvent);
 
-                context.EventsStudios.Add(new EventStudio { EventId = meetingEvent.Id, StudioId = vocalStudio.Id });
+                // context.EventsStudios.Add(new EventStudio { EventId = meetingEvent.Id, StudioId = vocalStudio.Id });
                 context.EventsGroups.Add(new EventGroup { EventId = meetingEvent.Id, GroupId = groupMale.Id });
                 context.EventsGroups.Add(new EventGroup { EventId = meetingEvent.Id, GroupId = groupFemale.Id });
                 context.EventsGroups.Add(new EventGroup { EventId = meetingEvent.Id, GroupId = groupSenior.Id });
@@ -348,7 +348,7 @@ namespace ScheduleMaster.DbSeader
                     Location = "Студия \"Вдохновения\""
                 };
                 context.Events.Add(jointRehearsalEvent);
-                context.EventsStudios.Add(new EventStudio { EventId = jointRehearsalEvent.Id, StudioId = vocalStudio.Id });
+                // context.EventsStudios.Add(new EventStudio { EventId = jointRehearsalEvent.Id, StudioId = vocalStudio.Id });
                 context.EventsGroups.Add(new EventGroup { EventId = jointRehearsalEvent.Id, GroupId = groupSenior.Id });
                 context.EventsGroups.Add(new EventGroup { EventId = jointRehearsalEvent.Id, GroupId = groupMale.Id });
                 await context.SaveChangesAsync();
