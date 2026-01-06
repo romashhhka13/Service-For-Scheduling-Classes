@@ -138,6 +138,49 @@ namespace ScheduleMaster.Controllers
                 return BadRequest();
             }
         }
+
+
+
+        // *** TELEGRAM BOT *** //
+
+
+        [HttpGet("by-chat/{chatId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetUserByChatId([FromRoute] long chatId)
+        {
+            try
+            {
+                var user = await _userService.GetUserByChatIdAsync(chatId);
+                return Ok(user);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Внутренняя ошибка" });
+            }
+        }
+
+        // [HttpPost("user/{chatId}/authorize")]
+        // public async Task<IActionResult> AuthorizeUser([FromRoute] long chatId, [FromBody] LoginRequest request)
+        // {
+        //     try
+        //     {
+        //         var user = await _authService.LoginAsync(request);
+        //         user.ChatId = chatId;
+        //         await _context.SaveChangesAsync();
+
+        //         return Ok(new { message = "Авторизовано!", userId = user.Id });
+        //     }
+        //     catch
+        //     {
+        //         return Unauthorized();
+        //     }
+        // }
+
+
     }
 }
 

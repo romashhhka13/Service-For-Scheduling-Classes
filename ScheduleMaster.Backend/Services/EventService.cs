@@ -75,20 +75,20 @@ namespace ScheduleMaster.Services
                 .Select(eg => eg.GroupId)
                 .ToListAsync();
 
-            var eventStudioIds = await _context.EventsStudios
-                .Where(es => es.EventId == eventId)
-                .Select(es => es.StudioId)
-                .ToListAsync();
+            // var eventStudioIds = await _context.EventsStudios
+            //     .Where(es => es.EventId == eventId)
+            //     .Select(es => es.StudioId)
+            //     .ToListAsync();
 
             var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
             var isInGroup = await _context.GroupsUsers
                 .AnyAsync(gu => gu.StudentId == currentUserId && eventGroupIds.Contains(gu.GroupId));
 
-            var isInStudio = await _context.StudiosUsers
-                .AnyAsync(su => su.StudentId == currentUserId && eventStudioIds.Contains(su.StudioId));
+            // var isInStudio = await _context.StudiosUsers
+            //     .AnyAsync(su => su.StudentId == currentUserId && eventStudioIds.Contains(su.StudioId));
 
             var currentUserRole = currentUser.FindFirst(ClaimTypes.Role)?.Value;
-            if (currentUserRole == "admin" || isInGroup || isInStudio)
+            if (currentUserRole == "admin" || isInGroup /*|| isInStudio*/)
             {
                 return new EventResponseDTO
                 {
@@ -118,17 +118,17 @@ namespace ScheduleMaster.Services
             if (ev.StartDateTime <= DateTime.UtcNow)
                 throw new ForbiddenException("Нельзя редактировать прошедшее или текущее событие");
 
-            var studioId = await _context.EventsStudios
-                .Where(es => es.EventId == eventId)
-                .Select(eg => eg.StudioId)
-                .FirstOrDefaultAsync();
+            // var studioId = await _context.EventsStudios
+            //     .Where(es => es.EventId == eventId)
+            //     .Select(eg => eg.StudioId)
+            //     .FirstOrDefaultAsync();
 
             var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
-            var isLeader = await _context.StudiosUsers
-                .AnyAsync(su => su.StudentId == currentUserId && su.StudioId == studioId && su.IsLeader);
+            // var isLeader = await _context.StudiosUsers
+            //     .AnyAsync(su => su.StudentId == currentUserId && su.StudioId == studioId && su.IsLeader);
 
-            if (role != "admin" && !isLeader)
-                throw new ForbiddenException("Нет прав на редактирование");
+            // if (role != "admin" && !isLeader)
+            //     throw new ForbiddenException("Нет прав на редактирование");
 
             if (!string.IsNullOrWhiteSpace(dto.Title))
                 ev.Title = dto.Title!;
@@ -154,22 +154,25 @@ namespace ScheduleMaster.Services
             if (ev.StartDateTime <= DateTime.UtcNow)
                 throw new BadRequestExceptions("Нельзя удалить прошедшее или текущее событие");
 
-            var studioId = await _context.EventsStudios
-                .Where(es => es.EventId == eventId)
-                .Select(eg => eg.StudioId)
-                .FirstOrDefaultAsync();
+            // var studioId = await _context.EventsStudios
+            //     .Where(es => es.EventId == eventId)
+            //     .Select(eg => eg.StudioId)
+            //     .FirstOrDefaultAsync();
 
             var currentUserId = Guid.Parse(currentUser.FindFirst("userId")?.Value!);
-            var isLeader = await _context.StudiosUsers
-                .AnyAsync(su => su.StudentId == currentUserId && su.StudioId == studioId && su.IsLeader);
+            // var isLeader = await _context.StudiosUsers
+            //     .AnyAsync(su => su.StudentId == currentUserId && su.StudioId == studioId && su.IsLeader);
 
             var role = currentUser.FindFirst(ClaimTypes.Role)?.Value;
-            if (role != "admin" && !isLeader)
+            if (role != "admin"/* && !isLeader*/)
                 throw new ForbiddenException("Нет прав на удаление");
 
             _context.Events.Remove(ev);
             await _context.SaveChangesAsync();
         }
+
+
+        // *** TELEGRAM-BOT *** // 
 
     }
 }

@@ -51,4 +51,17 @@ namespace ScheduleMaster.DTOs
         public required string Token { get; set; }
         public int ExpiresIn { get; set; }
     }
+
+    public class BotRegisterRequest
+    {
+        public string Surname { get; set; } = null!;
+        public string Name { get; set; } = null!;
+        public string? MiddleName { get; set; }
+        public string? Email { get; set; }
+        public string? Faculty { get; set; }
+        public string? GroupName { get; set; }
+        public long ChatId { get; set; }
+        public string? Role { get; set; } = "user";
+    }
+
 }

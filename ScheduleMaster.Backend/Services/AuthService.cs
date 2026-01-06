@@ -79,5 +79,38 @@ namespace ScheduleMaster.Services
                 ExpiresIn = 3600
             };
         }
+
+
+        // *** TELEGRAM-BOT *** // 
+
+        public async Task<Guid> RegisterBotUserAsync(BotRegisterRequest request)
+        {
+            // Проверяем нет ли уже такого пользователя по chatId
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.ChatId == request.ChatId);
+
+            if (existingUser != null)
+                throw new BadRequestExceptions("Пользователь уже зарегистрирован");
+
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = request.Name,
+                Surname = request.Surname,
+                MiddleName = request.MiddleName,
+                Email = request.Email,
+                Faculty = request.Faculty,
+                GroupName = request.GroupName,
+                ChatId = request.ChatId,
+                Role = request.Role ?? "user",
+                PasswordHash = "bot_user_no_password"  // Для ботовских пользователей
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return user.Id;
+        }
+
     }
 }

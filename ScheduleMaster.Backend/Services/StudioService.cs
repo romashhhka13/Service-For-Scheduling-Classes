@@ -143,11 +143,11 @@ namespace ScheduleMaster.Services
             };
 
             await _context.Events.AddAsync(ev);
-            await _context.EventsStudios.AddAsync(new EventStudio
-            {
-                EventId = ev.Id,
-                StudioId = studioId
-            });
+            // await _context.EventsStudios.AddAsync(new EventStudio
+            // {
+            //     EventId = ev.Id,
+            //     StudioId = studioId
+            // });
 
             // var groupIds = await _context.Groups
             //     .Where(g => g.StudioId == studioId)
@@ -209,5 +209,10 @@ namespace ScheduleMaster.Services
 
             return userDtos;
         }
+
+
+        // *** TELEGRAM-BOT *** // 
+
+
     }
 }

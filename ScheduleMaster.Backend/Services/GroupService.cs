@@ -153,16 +153,20 @@ namespace ScheduleMaster.Services
                 .Where(g => g.Id == groupId)
                 .Select(g => g.StudioId)
                 .FirstOrDefaultAsync();
-            await _context.EventsStudios.AddAsync(new EventStudio
-            {
-                EventId = ev.Id,
-                StudioId = studioId
-            });
+            // await _context.EventsStudios.AddAsync(new EventStudio
+            // {
+            //     EventId = ev.Id,
+            //     StudioId = studioId
+            // });
 
             await _context.SaveChangesAsync();
 
             return ev.Id;
         }
+
+
+
+        // *** TELEGRAM-BOT *** // 
 
     }
 }

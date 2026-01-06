@@ -169,5 +169,29 @@ namespace ScheduleMaster.Services
                 MemberCount = _context.StudiosUsers.Count(su => su.StudioId == s.Id)
             }).ToList();
         }
+
+        public async Task<UserByChatIdDto> GetUserByChatIdAsync(long telegramChatId)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.ChatId == telegramChatId);
+
+            if (user == null)
+                throw new NotFoundException("Пользователь с таким ChatId не найден");
+
+            return new UserByChatIdDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Surname = user.Surname,
+                Role = user.Role
+            };
+        }
+
+
+        // *** TELEGRAM-BOT *** // 
+
+
+
+
     }
 }

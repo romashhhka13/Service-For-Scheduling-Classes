@@ -70,5 +70,27 @@ namespace ScheduleMaster.Controllers
             Response.Cookies.Append("auth_token", "");
             return Ok(new { message = "Logged out" });
         }
+
+
+        // *** TELEGRAM BOT *** //
+
+        [HttpPost("register-bot")]
+        public async Task<IActionResult> RegisterUser([FromBody] BotRegisterRequest request)
+        {
+            try
+            {
+                var userId = await _authService.RegisterBotUserAsync(request);
+                return Ok(new { message = "Пользователь создан", userId = userId });
+            }
+            catch (BadRequestExceptions ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Внутренняя ошибка" });
+            }
+        }
+
     }
 }
