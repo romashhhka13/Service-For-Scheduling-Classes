@@ -27,9 +27,9 @@ namespace ScheduleMaster.Data
             modelBuilder.Entity<User>().ToTable("users")
                 .HasKey(user => user.Id);
 
-            modelBuilder.Entity<User>()
-                .HasIndex(user => user.Email)
-                .IsUnique();
+            // modelBuilder.Entity<User>()
+            //     .HasIndex(user => user.Email)
+            //     .IsUnique();
 
             modelBuilder.Entity<User>()
                 .HasIndex(user => user.ChatId)

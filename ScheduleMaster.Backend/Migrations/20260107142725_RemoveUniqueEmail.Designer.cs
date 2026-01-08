@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScheduleMaster.Data;
@@ -11,9 +12,11 @@ using ScheduleMaster.Data;
 namespace ScheduleMaster.Migrations
 {
     [DbContext(typeof(ScheduleMasterDbContext))]
-    partial class ScheduleMasterDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260107142725_RemoveUniqueEmail")]
+    partial class RemoveUniqueEmail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

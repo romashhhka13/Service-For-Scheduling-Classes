@@ -4,7 +4,7 @@ using ScheduleMaster.Services.ExternalApi;
 namespace ScheduleMaster.Controllers;
 
 [ApiController]
-[Route("api/gubkin")]
+[Route("api/schedule")]
 public class ExternalApiController : ControllerBase
 {
     private readonly IScheduleApiService _scheduleApiService;
@@ -23,29 +23,23 @@ public class ExternalApiController : ControllerBase
     /// Данные кешируются в Redis на 24 часа
     /// </summary>
     /// <returns>Список факультетов</returns>
-    [HttpGet("schedule")]
+    [HttpGet("faculties")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetFaculties()
     {
         try
         {
-            // _logger.LogInformation("Запрос всех факультетов");
-
             var faculties = await _scheduleApiService.GetFacultiesAsync();
 
             if (faculties == null || faculties.Count == 0)
             {
-                // _logger.LogWarning("Факультеты не найдены");
                 return Ok(new { message = "Факультеты не найдены", data = new List<object>() });
             }
-
-            // _logger.LogInformation($"Успешно получено {faculties.Count} факультетов");
             return Ok(new { message = "Факультеты успешно получены", data = faculties });
         }
         catch (Exception ex)
         {
-            // _logger.LogError(ex, "Ошибка при получении факультетов");
             return StatusCode(500, new { error = "Ошибка при получении факультетов", details = ex.Message });
         }
     }
@@ -64,19 +58,11 @@ public class ExternalApiController : ControllerBase
     {
         try
         {
-            if (facultyId <= 0)
-            {
-                // _logger.LogWarning($"Некорректный ID факультета: {facultyId}");
-                return BadRequest(new { error = "ID факультета должен быть положительным числом" });
-            }
-
-            // _logger.LogInformation($"Запрос групп для факультета {facultyId}");
 
             var groups = await _scheduleApiService.GetGroupsByFacultyAsync(facultyId);
 
             if (groups == null || groups.Count == 0)
             {
-                // _logger.LogWarning($"Группы для факультета {facultyId} не найдены");
                 return Ok(new { message = $"Группы для факультета {facultyId} не найдены", data = new List<object>() });
             }
 

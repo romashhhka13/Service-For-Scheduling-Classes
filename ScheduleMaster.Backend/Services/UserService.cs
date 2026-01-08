@@ -170,6 +170,8 @@ namespace ScheduleMaster.Services
             }).ToList();
         }
 
+        // *** TELEGRAM-BOT *** // 
+
         public async Task<UserByChatIdDto> GetUserByChatIdAsync(long telegramChatId)
         {
             var user = await _context.Users
@@ -188,7 +190,7 @@ namespace ScheduleMaster.Services
         }
 
 
-        // *** TELEGRAM-BOT *** // 
+
 
 
 

@@ -103,7 +103,7 @@ namespace ScheduleMaster.Services
                 GroupName = request.GroupName,
                 ChatId = request.ChatId,
                 Role = request.Role ?? "user",
-                PasswordHash = "bot_user_no_password"  // Для ботовских пользователей
+                PasswordHash = "bot_user_no_password"
             };
 
             _context.Users.Add(user);
