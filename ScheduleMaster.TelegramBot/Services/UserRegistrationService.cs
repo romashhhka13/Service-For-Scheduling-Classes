@@ -16,17 +16,20 @@ namespace ScheduleMaster.TelegramBot.Services
         private readonly UserRegistrationStateService _stateService;
         private readonly ApiClient _apiClient;
         private readonly ILogger<UserRegistrationService> _logger;
+        private readonly MenuService _menuService;
 
         public UserRegistrationService(
             TelegramBotClient bot,
             UserRegistrationStateService stateService,
             ApiClient apiClient,
-            ILogger<UserRegistrationService> logger)
+            ILogger<UserRegistrationService> logger,
+            MenuService menuService)
         {
             _bot = bot;
             _stateService = stateService;
             _apiClient = apiClient;
             _logger = logger;
+            _menuService = menuService;
         }
 
         public async Task ProcessMessageAsync(long chatId, string text, CancellationToken ct)
@@ -75,21 +78,7 @@ namespace ScheduleMaster.TelegramBot.Services
             }
             else if (callbackData == "skip")
             {
-                // if (state.Step == RegistrationStep.MiddleName)
-                // {
-                //     state.MiddleName = null;
-                //     state.Step = RegistrationStep.Email;
-                //     _stateService.SetState(chatId, state);
-                //     await SendEmailInputAsync(chatId, state, ct);
-                // }
-                // else if (state.Step == RegistrationStep.Email)
-                // {
-                //     state.Email = null;
-                //     state.Step = RegistrationStep.Faculty;
-                //     _stateService.SetState(chatId, state);
-                //     await SendFacultySelectionAsync(chatId, state, ct);
-                // }
-                return;
+                await HandleSkipAsync(chatId, state, ct);
             }
         }
 
@@ -362,6 +351,7 @@ namespace ScheduleMaster.TelegramBot.Services
             finally
             {
                 _stateService.RemoveState(chatId);
+                await _menuService.ShowMainMenuAsync(chatId);
             }
         }
     }

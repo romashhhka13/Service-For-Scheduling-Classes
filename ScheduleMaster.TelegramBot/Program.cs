@@ -43,24 +43,31 @@ services.AddHttpClient<ApiClient>(client =>
 });
 
 // Остальное
+services.AddSingleton<MessageHandler>();
 services.AddSingleton<TelegramBotClient>(new TelegramBotClient(botToken));
+services.AddTransient<MenuStateService>();
+services.AddTransient<MenuService>();
 services.AddSingleton<UserRegistrationStateService>();
-// services.AddTransient<MenuStateService>();
 services.AddTransient<UserRegistrationService>();
 services.AddTransient<BeginCommandHandler>();
 services.AddTransient<IBotCommandHandler, BeginCommandHandler>();
 services.AddTransient<StartCommandHandler>();
 services.AddTransient<IBotCommandHandler, StartCommandHandler>();
-// services.AddTransient<MenuCommandHandler>();
-// services.AddTransient<IBotCommandHandler, MenuCommandHandler>();
+services.AddTransient<MenuCommandHandler>();
+services.AddTransient<IBotCommandHandler, MenuCommandHandler>();
 services.AddTransient<CommandRouter>();
+services.AddTransient<MenuButtonHandler>();
+
 
 var serviceProvider = services.BuildServiceProvider();
 
+var messageHandler = serviceProvider.GetRequiredService<MessageHandler>();
 var botClient = serviceProvider.GetRequiredService<TelegramBotClient>();
 var commandRouter = serviceProvider.GetRequiredService<CommandRouter>();
 var registrationStateService = serviceProvider.GetRequiredService<UserRegistrationStateService>();
 var regService = serviceProvider.GetRequiredService<UserRegistrationService>();
+var menuStateService = serviceProvider.GetRequiredService<MenuStateService>();
+var menuBtnHandler = serviceProvider.GetRequiredService<MenuButtonHandler>();
 
 var me = await botClient.GetMeAsync();
 Log.Information($"Бот @{me.Username} запущен");
@@ -69,8 +76,7 @@ var cts = new CancellationTokenSource();
 var receiverOptions = new ReceiverOptions() { AllowedUpdates = Array.Empty<UpdateType>() };
 
 botClient.StartReceiving(
-    updateHandler: async (bot, update, ct) => await HandleUpdateAsync(bot, update, ct,
-    commandRouter, registrationStateService, regService),
+    updateHandler: (bot, update, ct) => messageHandler.HandleUpdateAsync(update, ct),
     pollingErrorHandler: HandlePollingErrorAsync,
     receiverOptions: receiverOptions,
     cancellationToken: cts.Token
@@ -79,48 +85,47 @@ botClient.StartReceiving(
 Console.ReadLine();
 cts.Cancel();
 
-static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
-    CancellationToken cancellationToken, CommandRouter router,
-    UserRegistrationStateService stateService, UserRegistrationService regService)
-{
-    var message = update.Message;
+// static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
+//     CancellationToken cancellationToken, CommandRouter router,
+//     UserRegistrationStateService stateService, UserRegistrationService regService,
+//     MenuStateService menuStateService, MenuButtonHandler menuButtonHandler)
+// {
+//     var message = update.Message;
 
-    if (message?.Text != null)
-    {
-        var chatId = message.Chat.Id;
+//     if (message?.Text != null)
+//     {
+//         var chatId = message.Chat.Id;
 
-        if (await router.TryHandleAsync(message.Text, chatId))
-            return;
+//         if (await router.TryHandleAsync(message.Text, chatId))
+//             return;
 
-        var state = stateService.GetState(chatId);
-        if (state != null)
-        {
-            await regService.ProcessMessageAsync(chatId, message.Text, cancellationToken);
-            return;
-        }
+//         var state = stateService.GetState(chatId);
+//         if (state != null)
+//         {
+//             await regService.ProcessMessageAsync(chatId, message.Text, cancellationToken);
+//             return;
+//         }
 
-        await botClient.SendTextMessageAsync(chatId, "❓ Неизвестное сообщение",
-            cancellationToken: cancellationToken);
-    }
+//         await menuButtonHandler.HandleButtonAsync(chatId, message.Text);
+//     }
 
-    if (update.CallbackQuery != null)
-    {
-        var callback = update.CallbackQuery;
-        var callbackMessage = callback.Message;
-        if (callbackMessage == null)
-            return;
-        var chatId = callbackMessage.Chat.Id;
+//     if (update.CallbackQuery != null)
+//     {
+//         var callback = update.CallbackQuery;
+//         var callbackMessage = callback.Message;
+//         if (callbackMessage == null)
+//             return;
+//         var chatId = callbackMessage.Chat.Id;
 
-        // Обработка выбора
-        await regService.ProcessCallbackAsync(chatId, callback.Data ?? "", cancellationToken);
+//         // Обработка выбора
+//         await regService.ProcessCallbackAsync(chatId, callback.Data ?? "", cancellationToken);
 
-        // Подтверждаем нажатие и убираем кнопки
-        await botClient.AnswerCallbackQueryAsync(callback.Id, cancellationToken: cancellationToken);
-        await botClient.EditMessageReplyMarkupAsync(chatId, callback.Message.MessageId,
-            replyMarkup: null, cancellationToken: cancellationToken);
-    }
-}
-
+//         // Подтверждаем нажатие и убираем кнопки
+//         await botClient.AnswerCallbackQueryAsync(callback.Id, cancellationToken: cancellationToken);
+//         await botClient.EditMessageReplyMarkupAsync(chatId, callback.Message.MessageId,
+//             replyMarkup: null, cancellationToken: cancellationToken);
+//     }
+// }
 
 
 static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

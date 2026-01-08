@@ -3,14 +3,14 @@ using ScheduleMaster.TelegramBot.Services;
 
 namespace ScheduleMaster.TelegramBot.Handlers.Commands
 {
-    public class StartCommandHandler : IBotCommandHandler
+    public class MenuCommandHandler : IBotCommandHandler
     {
         private readonly MenuService _menuService;
-        private readonly ILogger<StartCommandHandler> _logger;
+        private readonly ILogger<MenuCommandHandler> _logger;
 
-        public string Command => "/start";
+        public string Command => "/menu";
 
-        public StartCommandHandler(MenuService menuService, ILogger<StartCommandHandler> logger)
+        public MenuCommandHandler(MenuService menuService, ILogger<MenuCommandHandler> logger)
         {
             _menuService = menuService;
             _logger = logger;
@@ -18,9 +18,8 @@ namespace ScheduleMaster.TelegramBot.Handlers.Commands
 
         public async Task HandleAsync(long chatId)
         {
-            _logger.LogInformation("Команда /start для {ChatId}", chatId);
+            _logger.LogInformation("Команда /menu для {ChatId}", chatId);
             await _menuService.ShowMainMenuAsync(chatId);
         }
     }
-
 }

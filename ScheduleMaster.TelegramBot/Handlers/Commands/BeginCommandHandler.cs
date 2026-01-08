@@ -4,6 +4,8 @@ using Telegram.Bot.Types.Enums;
 using ScheduleMaster.Services;
 using ScheduleMaster.TelegramBot.States;
 using ScheduleMaster.TelegramBot.Services;
+using Telegram.Bot.Types.ReplyMarkups;
+using ScheduleMaster.TelegramBot.DTOs;
 
 namespace ScheduleMaster.TelegramBot.Handlers.Commands
 {
@@ -13,6 +15,7 @@ namespace ScheduleMaster.TelegramBot.Handlers.Commands
         private readonly ILogger<BeginCommandHandler> _logger;
         private readonly UserRegistrationStateService _stateService;
         private readonly ApiClient _apiClient;
+        private readonly MenuService _menuService;
 
         public string Command => "/begin";
 
@@ -20,12 +23,14 @@ namespace ScheduleMaster.TelegramBot.Handlers.Commands
             TelegramBotClient botClient,
             ILogger<BeginCommandHandler> logger,
             UserRegistrationStateService stateService,
-            ApiClient apiClient)
+            ApiClient apiClient,
+            MenuService menuService)
         {
             _botClient = botClient;
             _logger = logger;
             _stateService = stateService;
             _apiClient = apiClient;
+            _menuService = menuService;
         }
 
         public async Task HandleAsync(long chatId)
@@ -35,10 +40,7 @@ namespace ScheduleMaster.TelegramBot.Handlers.Commands
             var existingUser = await _apiClient.GetUserByChatIdAsync(chatId);
             if (existingUser != null)
             {
-                await _botClient.SendTextMessageAsync(
-                    chatId: chatId,
-                    text: $"Привет, {existingUser.Surname} {existingUser.Name}! Ты уже зарегистрирован!",
-                    parseMode: ParseMode.Html);
+                await _menuService.ShowMainMenuAsync(chatId);
                 return;
             }
 
