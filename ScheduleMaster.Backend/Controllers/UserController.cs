@@ -163,6 +163,57 @@ namespace ScheduleMaster.Controllers
             }
         }
 
+        [HttpGet("studios_as_leader/{userId}")]
+        public async Task<IActionResult> GetStudiosAsLeader(Guid userId)
+        {
+            try
+            {
+                var studios = await _userService.GetUserStudiosAsync(userId);
+
+                if (studios == null || !studios.Any())
+                {
+                    return Ok(new GetUserStudiosResponse
+                    {
+                        Message = $"Студии для пользователя {userId} не найдены",
+                        Data = new List<StudioDto>()
+                    });
+                }
+
+                return Ok(new GetUserStudiosResponse
+                {
+                    Message = "Студии успешно получены",
+                    Data = studios
+                });
+            }
+            catch (ForbiddenException ex)
+            {
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Ошибка при получении студий", details = ex.Message });
+            }
+        }
+
+        [HttpPost("{userId}/studio")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateStudio([FromBody] CreateStudioRequestDTO dto, Guid userId)
+        {
+            try
+            {
+                var studioId = await _userService.CreateStudioAsync(dto, userId);
+                return Ok(new { message = "Студия создана", data = studioId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Ошибка создания", details = ex.Message });
+            }
+        }
+
+
+
+
+
         // [HttpPost("user/{chatId}/authorize")]
         // public async Task<IActionResult> AuthorizeUser([FromRoute] long chatId, [FromBody] LoginRequest request)
         // {

@@ -189,6 +189,47 @@ namespace ScheduleMaster.Services
             };
         }
 
+        public async Task<List<StudioDto>> GetUserStudiosAsync(Guid userId)
+        {
+            return await _context.StudiosUsers
+                .Where(su => su.StudentId == userId)
+                .Join(_context.Studios,
+                    su => su.StudioId,
+                    s => s.Id,
+                    (su, s) => new StudioDto
+                    {
+                        Id = s.Id,
+                        Title = s.Title ?? "",
+                        StudioCategoryId = s.StudioCategoryId,
+                        MemberCount = _context.StudiosUsers.Count(su2 => su2.StudioId == s.Id),
+                        CurrentUserIsLeader = _context.StudiosUsers.Any(su2 => su2.StudentId == userId && su2.StudioId == s.Id && su2.IsLeader)
+                    })
+                .ToListAsync();
+        }
+
+
+        public async Task<Guid> CreateStudioAsync(CreateStudioRequestDTO dto, Guid userId)
+        {
+            var studio = new Studio
+            {
+                Id = Guid.NewGuid(),
+                Title = dto.Title,
+                StudioCategoryId = dto.CategoryId,
+            };
+
+            await _context.Studios.AddAsync(studio);
+
+            await _context.StudiosUsers.AddAsync(new StudioUser
+            {
+                StudentId = userId,
+                StudioId = studio.Id,
+                IsLeader = true
+            });
+
+            await _context.SaveChangesAsync();
+            return studio.Id;
+        }
+
 
 
 

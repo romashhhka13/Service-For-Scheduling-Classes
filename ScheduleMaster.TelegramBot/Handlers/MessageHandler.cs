@@ -3,6 +3,9 @@ using ScheduleMaster.Services;
 using ScheduleMaster.TelegramBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using ScheduleMaster.TelegramBot.States;
+using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Types.Enums;
 
 namespace ScheduleMaster.TelegramBot.Handlers
 {
@@ -18,6 +21,10 @@ namespace ScheduleMaster.TelegramBot.Handlers
         private readonly ILogger<MessageHandler> _logger;
         private readonly ApiClient _apiClient;
         private readonly MenuService _menuService;
+        private readonly MenuStateService _menuStateService;
+        private readonly StudioService _studioService;
+
+
 
         public MessageHandler(
             TelegramBotClient botClient,
@@ -27,7 +34,9 @@ namespace ScheduleMaster.TelegramBot.Handlers
             UserRegistrationStateService regStateService,
             ILogger<MessageHandler> logger,
             ApiClient apiClient,
-            MenuService menuService)
+            MenuService menuService,
+            MenuStateService menuStateService,
+            StudioService studioService)
         {
             _botClient = botClient;
             _commandRouter = commandRouter;
@@ -37,6 +46,8 @@ namespace ScheduleMaster.TelegramBot.Handlers
             _logger = logger;
             _apiClient = apiClient;
             _menuService = menuService;
+            _menuStateService = menuStateService;
+            _studioService = studioService;
 
         }
 
@@ -69,7 +80,35 @@ namespace ScheduleMaster.TelegramBot.Handlers
                 if (await _menuHandler.HandleButtonAsync(chatId, text))
                     return;
 
-                // 5. Главное меню
+                // 5. Создание студии
+                var menuState = _menuStateService.GetState(chatId);
+                if (menuState?.StudioStep == StudioMenuStep.CreateStudioTitle)
+                {
+                    menuState.PendingStudioName = text.Trim();
+                    menuState.StudioStep = StudioMenuStep.CreateStudioCategory;
+                    _menuStateService.SetState(chatId, menuState);
+                    await _studioService.ShowStudioCategoriesAsync(chatId);
+                    return;
+                }
+
+                if (menuState?.StudioStep == StudioMenuStep.CreateStudioCategory)
+                {
+                    var categories = await _apiClient.GetCategoriesAsync();
+                    var selected = categories.FirstOrDefault(c => c.Category == text);
+                    if (selected == null)
+                    {
+                        await _botClient.SendTextMessageAsync(chatId, "❌ Выберите категорию из списка.");
+                        return;
+                    }
+                    menuState.SelectedStudioCategoryId = selected.Id;
+                    _menuStateService.SetState(chatId, menuState);
+                    await _studioService.CreateStudioViaApiAsync(menuState.PendingStudioName!, chatId);
+                    return;
+                }
+
+
+
+                // 6. Главное меню
                 await _menuService.ShowMainMenuAsync(chatId);
 
             }
@@ -79,6 +118,22 @@ namespace ScheduleMaster.TelegramBot.Handlers
                     update.CallbackQuery.Message!.Chat.Id,
                     update.CallbackQuery.Data ?? "", ct);
                 await _botClient.AnswerCallbackQueryAsync(update.CallbackQuery.Id, cancellationToken: ct);
+
+                var data = update.CallbackQuery.Data ?? "";
+                if (data == "studios_back")
+                {
+                    await _menuService.ShowStudiosMenuAsync(update.CallbackQuery.Message.Chat.Id);
+                }
+                else if (data.StartsWith("studio_select:"))
+                {
+                    var studioIdString = data.Replace("studio_select:", "");
+                    if (Guid.TryParse(studioIdString, out var studioId))
+                    {
+                        var state = _menuStateService.GetState(update.CallbackQuery.Message.Chat.Id);
+                        state.SelectedStudioId = studioId;  // Guid? или int?
+                        _menuStateService.SetState(update.CallbackQuery.Message.Chat.Id, state);
+                    }
+                }
             }
         }
 

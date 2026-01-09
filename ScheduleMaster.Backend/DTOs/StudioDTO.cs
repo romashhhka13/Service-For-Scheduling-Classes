@@ -22,6 +22,21 @@ namespace ScheduleMaster.DTOs
         public bool currentUserIsLeader { get; set; }
     }
 
+    public class StudioDto
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public Guid? StudioCategoryId { get; set; }
+        public int MemberCount { get; set; }
+        public bool CurrentUserIsLeader { get; set; }
+    }
+
+    public class GetUserStudiosResponse
+    {
+        public string Message { get; set; } = string.Empty;
+        public List<StudioDto> Data { get; set; } = new();
+    }
+
     public class GetCategoriesResponseDTO
     {
         public Guid Id { get; set; }

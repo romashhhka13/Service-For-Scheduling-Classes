@@ -12,12 +12,19 @@ namespace ScheduleMaster.TelegramBot.Services
         private readonly HttpClient _httpClient;
         private readonly string _baseUrl;
 
+
         public ApiClient(HttpClient httpClient, IConfiguration config)
         {
             _httpClient = httpClient;
             _baseUrl = config["Api:BaseUrl"] ?? "http://localhost:5003";
         }
+        private readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
 
+        // ExternalAPI
 
         public async Task<List<FacultyDto>> GetFacultiesAsync()
         {
@@ -25,11 +32,7 @@ namespace ScheduleMaster.TelegramBot.Services
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
-            var facultiesResponse = JsonSerializer.Deserialize<GetFacultiesResponse>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,  // ← camelCase → PascalCase
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase  // ← PascalCase → camelCase
-            });
+            var facultiesResponse = JsonSerializer.Deserialize<GetFacultiesResponse>(json, _jsonOptions);
 
             return facultiesResponse?.Data ?? new List<FacultyDto>();
         }
@@ -39,14 +42,12 @@ namespace ScheduleMaster.TelegramBot.Services
             var response = await _httpClient.GetAsync($"{_baseUrl}/api/schedule/faculties/{facultyId}/groups");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            var groupsResponse = JsonSerializer.Deserialize<GetFacultyGroupsResponse>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,  // ← camelCase → PascalCase
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase  // ← PascalCase → camelCase
-            });
+            var groupsResponse = JsonSerializer.Deserialize<GetFacultyGroupsResponse>(json, _jsonOptions);
 
             return groupsResponse?.Data ?? new List<StudyGroupDto>();
         }
+
+        // USER
 
         public async Task<bool> CreateUserAsync(CreateUserDto dto, long chatId)
         {
@@ -69,6 +70,7 @@ namespace ScheduleMaster.TelegramBot.Services
             return response.IsSuccessStatusCode;
         }
 
+
         public async Task<UserByChatIdDto?> GetUserByChatIdAsync(long chatId)
         {
             try
@@ -77,10 +79,7 @@ namespace ScheduleMaster.TelegramBot.Services
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var user = JsonSerializer.Deserialize<UserByChatIdDto>(json, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                var user = JsonSerializer.Deserialize<UserByChatIdDto>(json, _jsonOptions);
                 return user;
             }
             catch (HttpRequestException)
@@ -92,6 +91,57 @@ namespace ScheduleMaster.TelegramBot.Services
                 return null;
             }
         }
+
+        // Studio
+        public async Task<Guid> CreateStudioAsync(CreateStudioBotRequestDTO dto, Guid userId)
+        {
+            var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/user/{userId}/studio", dto);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            var studioResponse = JsonSerializer.Deserialize<CreateStudioResponse>(json, _jsonOptions);
+
+            if (Guid.TryParse(studioResponse?.Data, out var studioId))
+                return studioId;
+
+            throw new FormatException($"Invalid studio ID: {studioResponse?.Data}");
+        }
+
+        public async Task<List<GetCategoriesResponseDTO>> GetCategoriesAsync()
+        {
+            var response = await _httpClient.GetAsync($"{_baseUrl}/api/studio/categories");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<GetCategoriesResponseDTO>>(json, _jsonOptions);
+        }
+
+
+        public async Task<GetUserStudiosResponse> GetStudiosAsLeaderAsync(Guid userId)
+        {
+            var response = await _httpClient.GetAsync($"{_baseUrl}/api/user/studios_as_leader/{userId}");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<GetUserStudiosResponse>(json, _jsonOptions);
+        }
+
+
+
+        // public async Task<StudioDetailDto> GetStudioDetailAsync(Guid studioId, Guid userId)
+        // {
+        //     var response = await _httpClient.GetAsync($"{_baseUrl}/api/studio/{studioId}");
+        //     response.EnsureSuccessStatusCode();
+        //     var json = await response.Content.ReadAsStringAsync();
+        //     return JsonSerializer.Deserialize<StudioDetailDto>(json, _jsonOptions);
+        // }
+
+        // public async Task<List<UserResponseDto>> GetStudioUsersAsync(Guid studioId, Guid userId)
+        // {
+        //     var response = await _httpClient.GetAsync($"{_baseUrl}/api/studio/{studioId}/users");
+        //     response.EnsureSuccessStatusCode();
+        //     var json = await response.Content.ReadAsStringAsync();
+        //     return JsonSerializer.Deserialize<List<UserResponseDto>>(json, _jsonOptions);
+        // }
 
 
     }

@@ -154,7 +154,7 @@ namespace ScheduleMaster.Controllers
 
 
         [HttpGet("categories")]
-        [Authorize(Roles = "user,admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCategories()
         {
             try
@@ -170,7 +170,6 @@ namespace ScheduleMaster.Controllers
 
 
         // *** TELEGRAM-BOT *** // 
-
 
 
     }

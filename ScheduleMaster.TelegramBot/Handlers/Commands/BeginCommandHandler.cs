@@ -44,6 +44,7 @@ namespace ScheduleMaster.TelegramBot.Handlers.Commands
                 return;
             }
 
+
             var state = new UserRegistrationState
             {
                 ChatId = chatId,

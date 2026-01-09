@@ -42,13 +42,14 @@ services.AddHttpClient<ApiClient>(client =>
     client.BaseAddress = new Uri(config["ApiBaseUrl"] ?? "http://localhost:5003/");
 });
 
-// Остальное
+// Регистрация зависимостей
 services.AddSingleton<MessageHandler>();
 services.AddSingleton<TelegramBotClient>(new TelegramBotClient(botToken));
 services.AddTransient<MenuStateService>();
 services.AddTransient<MenuService>();
 services.AddSingleton<UserRegistrationStateService>();
 services.AddTransient<UserRegistrationService>();
+services.AddTransient<StudioService>();
 services.AddTransient<BeginCommandHandler>();
 services.AddTransient<IBotCommandHandler, BeginCommandHandler>();
 services.AddTransient<StartCommandHandler>();
@@ -84,48 +85,6 @@ botClient.StartReceiving(
 
 Console.ReadLine();
 cts.Cancel();
-
-// static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
-//     CancellationToken cancellationToken, CommandRouter router,
-//     UserRegistrationStateService stateService, UserRegistrationService regService,
-//     MenuStateService menuStateService, MenuButtonHandler menuButtonHandler)
-// {
-//     var message = update.Message;
-
-//     if (message?.Text != null)
-//     {
-//         var chatId = message.Chat.Id;
-
-//         if (await router.TryHandleAsync(message.Text, chatId))
-//             return;
-
-//         var state = stateService.GetState(chatId);
-//         if (state != null)
-//         {
-//             await regService.ProcessMessageAsync(chatId, message.Text, cancellationToken);
-//             return;
-//         }
-
-//         await menuButtonHandler.HandleButtonAsync(chatId, message.Text);
-//     }
-
-//     if (update.CallbackQuery != null)
-//     {
-//         var callback = update.CallbackQuery;
-//         var callbackMessage = callback.Message;
-//         if (callbackMessage == null)
-//             return;
-//         var chatId = callbackMessage.Chat.Id;
-
-//         // Обработка выбора
-//         await regService.ProcessCallbackAsync(chatId, callback.Data ?? "", cancellationToken);
-
-//         // Подтверждаем нажатие и убираем кнопки
-//         await botClient.AnswerCallbackQueryAsync(callback.Id, cancellationToken: cancellationToken);
-//         await botClient.EditMessageReplyMarkupAsync(chatId, callback.Message.MessageId,
-//             replyMarkup: null, cancellationToken: cancellationToken);
-//     }
-// }
 
 
 static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

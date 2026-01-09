@@ -6,7 +6,7 @@ namespace ScheduleMaster.TelegramBot.Services
     public class MenuStateService
     {
         private readonly IMemoryCache _cache;
-        private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(24);
+        private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(2);
 
         public MenuStateService(IMemoryCache cache)
         {

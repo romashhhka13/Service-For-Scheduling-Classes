@@ -58,16 +58,16 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    // using (var scope = app.Services.CreateScope())
-    // {
-    //     var services = scope.ServiceProvider;
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
 
-    //     var context = services.GetRequiredService<ScheduleMasterDbContext>();
+        var context = services.GetRequiredService<ScheduleMasterDbContext>();
 
-    //     Console.WriteLine("Начинаем инициализацию данных...");
-    //     await DbSeeder.SeedAsync(context);
-    //     Console.WriteLine("Инициализация данных завершена.");
-    // }
+        Console.WriteLine("Начинаем инициализацию данных...");
+        await DbSeeder.SeedAsync(context);
+        Console.WriteLine("Инициализация данных завершена.");
+    }
 
     app.MapOpenApi("/openapi/v1.json");
     app.UseSwaggerUi(options =>
